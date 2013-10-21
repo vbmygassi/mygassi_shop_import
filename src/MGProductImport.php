@@ -835,8 +835,8 @@ class MGImportSettings
 {
 	const JSON = 0; const XML = 1;
 	const DOCTYPE = MGImportSettings::JSON;
-	const PRODUCTLIST = "http://127.0.0.1/kack/eximp.php";	
-	const IMAGEDOWNLOAD = "http://127.0.0.1/kack/data/images/";
+	const PRODUCTLIST = "http://127.0.0.1/testexport/eximp.php";	
+	const IMAGEDOWNLOAD = "http://127.0.0.1/testexport/data/images/";
 	const SQLLITE = "./db/sqllite.db";
 	const SQLLITEBCKPP = "./db/bckpp/sqllite.db";
 	const CSVEXPORT = "./export/product-import.csv";
@@ -845,9 +845,9 @@ class MGImportSettings
 	const MAGEROOT = "/Users/vico/Workspace/MyGassiShop/app/Mage.php";
 	const REFPROD = "./data/mprod.php";
 	const SQLDUMP = "./export/sqldump/";
-	const MAGEDBUSER = "root";
-	const MAGEDBPASS = "2317.187.fuckingsuck";
-	const MAGEDBHOST = "127.0.0.1";
+	const MAGEDBUSER = "";
+	const MAGEDBPASS = "";
+	const MAGEDBHOST = "";
 	const MAGETABLE = "magento7"; 
 	const LOGTOSCREEN = true;
 	const LOGTOFILE = true;
