@@ -140,34 +140,6 @@ class TestMGProductImport
 	}
 }
 
-/*
-TestMGProductImport::testFetchProductlist();
-TestMGProductImport::testParseProductlist();
-TestMGProductImport::testWriteProductlist();
-TestMGProductImport::testExportProductlistToCSV();
-TestMGProductImport::testExportProductlistToXML();
-TestMGProductImport::testSerializeProductlist();
-TestMGProductImport::testUnserializeProductlist();
-TestMGProductImport::testFetchProductlist();
-TestMGProductImport::testFetchProduct();
-TestMGProductImport::testInitMage();
-TestMGProductImport::testImportProductlist();
-TestMGProductImport::testBackupMagentoProducts();
-TestMGProductImport::testDeleteMagentoProducts();
-*/
-
-/*
-TestMGProductImport::testDeleteImageGalleries();
-TestMGProductImport::testImportProductlist();
-TestMGProductImport::testDownloadImages();
-TestMGProductImport::testImportImages();
-*/
-
-/*
-TestMGProductImport::testDeleteMagentoProducts();
-TestMGProductImport::testReindexMagento();
-TestMGProductImport::testDeleteImageGalleries();
-*/
 
 TestMGProductImport::testDeleteCategories();
 TestMGProductImport::testDeleteProducts();
@@ -177,5 +149,4 @@ TestMGProductImport::testDownloadImages();
 TestMGProductImport::testImportImages();
 TestMGProductImport::testCleanMagentoCache();
 TestMGProductImport::testFillImageCache();
-TestMGProductImport::testLinkProducts();
 // TestMGProductImport::testReindexMagento();

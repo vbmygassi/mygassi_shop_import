@@ -278,6 +278,7 @@ class MGProductImport
 		MGProductImport::initMagento();
 		$cid = MGImportSettings::CATPREFIX . $group->id;
 		$cat = new Mage_Catalog_Model_Category();
+		$cat->setStoreId(0);
 		$cat->setId($cid);
 		$cat->setName($group->name);
 		$cat->setErpId($group->erp_id);
@@ -386,6 +387,7 @@ class MGProductImport
 		MGProductImport::initMagento();
 		$cid = MGImportSettings::CATPREFIX . $category->id;
 		$cat = new Mage_Catalog_Model_Category();
+		$cat->setStoreId(0);
 		$cat->setId($cid);
 		$cat->setName($category->name);
 		$cat->setErpId($category->erp_id);
@@ -451,8 +453,9 @@ class MGProductImport
 		// Just don't
 		/*
 		$mprod->setStoreId(MGProductImport::getStoreId("default"));
-		$mprod->setStoreId(0);
 		*/
+		
+		$mprod->setStoreId(0);
 
 		$mprod->setName($product->name);
 		
@@ -468,6 +471,13 @@ class MGProductImport
 		$mprod->setName($product->name);
 		$mprod->setDescription($product->description);
 		$mprod->setIsStreamProduct($product->stream);
+		// ???
+		$mprod->setIsActive(1);
+		$mprod->setStatus(1);
+		$mprod->setState(1);
+		// $mprod->setState($product->karlie_state);
+		// $mprod->setStatus($product->status);
+		$mprod->setTaxClassId(1);
 		$mprod->setIsTopProduct($product->top);
 		$mprod->setErp($product->erp);
 		$mprod->setPrice($product->price);
@@ -479,12 +489,10 @@ class MGProductImport
 		
 		$mprod->setTypeId("simple");
 	
-		$mprod->setState($product->karlie_state);
 		$mprod->setSmallImage($product->image);
 		$mprod->setThumbnail($product->image);
 		$mprod->setImage($product->image);
 		$mprod->setMediaImage($product->image);
-		$mprod->setStatus($product->status);
 		$mprod->setWebsiteIds(array(1));
 
 		$catIds = array(MGImportSettings::CATPREFIX . $product->category_ids);
@@ -617,20 +625,22 @@ class MGProductImport
 		MGProductImport::initMagento();
 		$visibility = array("image", "small_image", "thumbnail");
 		$label = "the1st";
+		$coll = Mage::getModel("catalog/category")->getCollection();
+		foreach($coll as $cat){
+			$cat = $cat->load($cat->getId());
+			$cat->setStoreId(0);
+			$cat->setThumbnail($cat->getImage());
+			$cat->save();
+			MGProductImport::log("importImages(): cat: " . $cat->getImage() . PHP_EOL);
+		}
 		$coll = Mage::getModel("catalog/product")->getCollection();
 		foreach($coll as $product){
 			$product = $product->load($product->getId());
 			// Writes new image collection
-			// $mprod->setStoreId(MGProductImport::getStoreId("default"));
 			$target = Mage::getBaseDir("media") . DS . "import" . DS . $product->getImage();
-			MGProductImport::log($target . PHP_EOL); 
-			if(!file_exists($target)){
-				MGProductImport::log("No such image: " . $target . PHP_EOL);
-				continue;
-			}
 			try{
 				$product->addImageToMediaGallery($target, $visibility, false, false);
-				MGProductImport::log("importImages(): add: " . $target . PHP_EOL);
+				MGProductImport::log("importImages(): prod: " . $target . PHP_EOL);
 			}
 			catch(Exception $e){
 				MGProductImport::log("Here is your Exception dump while importing image assets: " . $e->getMessage() . PHP_EOL);
@@ -845,23 +855,20 @@ class MGImportSettings
 	const MAGEROOT = "/Users/vico/Workspace/MyGassiShop/app/Mage.php";
 	const REFPROD = "./data/mprod.php";
 	const SQLDUMP = "./export/sqldump/";
-	const MAGEDBUSER = "";
-	const MAGEDBPASS = "";
-	const MAGEDBHOST = "";
+	const MAGEDBUSER = "root";
+	const MAGEDBPASS = "2317.187.fuckingsuck";
+	const MAGEDBHOST = "localhost";
 	const MAGETABLE = "magento7"; 
 	const LOGTOSCREEN = true;
 	const LOGTOFILE = true;
 	const LOGFILE = "./log/import.log";
 	const TIMEZONE = "Europe/Berlin";
-
 	// import item types
 	const PRODUCT_DEFAULT = "default";
 	const PRODUCT_GROUP = "grouped";
 	const CATEGORY = "category";
-	
 	// 
 	const CATPREFIX = "999";
-
 	// 
 	const ROOTCATS = "1/3/";
 }
