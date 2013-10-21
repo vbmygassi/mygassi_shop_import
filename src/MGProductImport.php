@@ -7,7 +7,6 @@
 
 
 
-	Magento; das Gedärm, das aus dem Arschloch hängt.
 
 
 
@@ -283,7 +282,11 @@ class MGProductImport
 		$cat->setName($group->name);
 		$cat->setErpId($group->erp_id);
 		$cat->setIsActive(1);
-		$cat->setPath("1/3/" . MGImportSettings::CATPREFIX . $group->category_ids . "/" . $cid);
+		$cat->setPath(""
+			. MGImportSettings::ROOTCATS 
+			. MGImportSettings::CATPREFIX . $group->category_ids . "/" 
+			. $cid
+		);
 		$cat->setParentId(MGImportSettings::CATPREFIX . $group->category_ids);
 		$cat->setImage($group->image);
 		$cat->setDescription($group->description);
@@ -387,7 +390,11 @@ class MGProductImport
 		$cat->setName($category->name);
 		$cat->setErpId($category->erp_id);
 		$cat->setIsActive(1);
-		$cat->setPath("1/3/" . $cid);
+		$cat->setPath("" 
+			. MGImportSettings::ROOTCATS
+			. $cid);
+		$cat->setImage($category->image);
+		$cat->setDescription($category->description);
 		$cat->save();
 	}	
 
@@ -851,8 +858,12 @@ class MGImportSettings
 	const PRODUCT_DEFAULT = "default";
 	const PRODUCT_GROUP = "grouped";
 	const CATEGORY = "category";
-
+	
+	// 
 	const CATPREFIX = "999";
+
+	// 
+	const ROOTCATS = "1/3/";
 }
 
 
