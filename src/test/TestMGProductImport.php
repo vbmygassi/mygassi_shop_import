@@ -85,9 +85,62 @@ class TestMGProductImport
 		$res = MGProductImport::importItems($productlist);
 	}
 
+	// ONE ITEM
+	// Imports one item (category, product, productgroup)
+	// from the export list (karlie service)
+	static public function testImportItemWithExportIndex($index)
+	{
+		$doc = MGProductImport::fetchProductlist();
+		$itemlist = MGProductImport::parseProductlist($doc);
+		$temp = new stdClass();
+		$temp->products = array(); 
+		foreach($itemlist->products as $item){
+			if($index == ($item->id)){
+				$temp->products[]= $item;
+			}
+		}
+		$res = MGProductImport::importItems($temp);
+	}
+
+	// ONE ITEM : ASSET
+	// Imports image of a given item (index from the karlie export list)
+	static public function testImportImageWithExportIndex($index)
+	{
+		MGProductImport::initMagento();
+		$doc = MGProductImport::fetchProductlist();
+		$itemlist = MGProductImport::parseProductlist($doc);
+		foreach($itemlist->products as $item){
+			if($index == ($item->id)){
+				$temp = $item;
+			}
+		}
+		$coll = array();
+		switch($temp->type){
+			case MGImportSettings::PRODUCT_DEFAULT:
+				// Selects product by sku
+				if(null != ($res = Mage::getModel("catalog/product")->loadByAttribute("sku", $temp->sku))){
+					$coll[]= Mage::getModel("catalog/product")->loadByAttribute("sku", $temp->sku);
+					MGProductImport::importProductImages($coll);
+				}
+				break;
+			case MGImportSettings::PRODUCT_GROUP:
+			case MGImportSettings::CATEGORY:
+				// Selects product by 999 +id
+				if(null != ($res = Mage::getModel("catalog/category")->load(MGImportSettings::CATPREFIX . $temp->id))){
+					$coll[]= Mage::getModel("catalog/category")->load(MGImportSettings::CATPREFIX . $temp->id);
+					MGProductImport::importCategoryImages($coll);
+				}
+				break;
+		}
+	}
+
+
+
+
 	static public function testImportImages()
 	{
-		$res = MGProductImport::importImages();
+		$res = MGProductImport::importCategoryImages();
+		$res = MGProductImport::importProductImages();
 	}
 
 	static public function testDownloadImages()
@@ -150,3 +203,11 @@ TestMGProductImport::testImportImages();
 TestMGProductImport::testCleanMagentoCache();
 TestMGProductImport::testFillImageCache();
 // TestMGProductImport::testReindexMagento();
+
+/*
+TestMGProductImport::testImportImageWithExportIndex("191919191");
+TestMGProductImport::testImportItemWithExportIndex("15037");
+TestMGProductImport::testImportImageWithExportIndex("15037");
+TestMGProductImport::testImportItemWithExportIndex("2");
+TestMGProductImport::testImportImageWithExportIndex("2");
+*/

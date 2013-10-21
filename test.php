@@ -7,6 +7,8 @@ Mage::app();
 
 $cat = Mage::getModel("catalog/category")->load(99916);
 
+
+
 print_r($cat->debug());
 print PHP_EOL;
 print "getImageUrl()";
@@ -20,3 +22,8 @@ print_r($cat->getImage());
 print PHP_EOL;
 print "getSmallImage()";
 print_r($cat->getSmallImage());
+
+
+
+$catId = Mage::app()->getStore()->getRootCategoryId();
+print_r($catId);

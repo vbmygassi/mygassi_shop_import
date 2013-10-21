@@ -255,16 +255,17 @@ class MGProductImport
 		foreach($itemlist->products as $item){
 			switch($item->type){
 				case MGImportSettings::PRODUCT_DEFAULT:	
-					MGProductImport::importProduct($item);
+					$res = MGProductImport::importProduct($item);
 					break;
 				case MGImportSettings::PRODUCT_GROUP:
-					MGProductImport::importProductGroup($item);
+					$res = MGProductImport::importProductGroup($item);
 					break;
 				case MGImportSettings::CATEGORY:
-					MGProductimport::importCategory($item);	
+					$res = MGProductimport::importCategory($item);	
 					break;
 			}
 		}
+		return true;
 	}
 
 	/*
@@ -590,14 +591,22 @@ class MGProductImport
 		MGProductImport::log("deleteImageGalleries(): " . PHP_EOL);
 		MGProductImport::initMagento($admin=true);
 		$coll = Mage::getModel("catalog/product")->getCollection();
-		// foreach($productlist as $product){
+		
+
+
+		// crashes for some reason...
+		return;
+
+
+
 		foreach($coll as $product){
 			$mprod = Mage::getModel("catalog/product")->loadByAttribute("sku", $product->sku);
 			if(null == $mprod){
 				continue;
 			}
 			$mprod = $mprod->load($mprod->getId());
-			$mprod->setStoreId(MGProductImport::getStoreId("default"));
+			// $mprod->setStoreId(MGProductImport::getStoreId("default"));
+			$mprod->setStoreId(0);
 			// Deletes exisiting image collection
 			try{
 				$media = Mage::getModel("catalog/product_attribute_media_api");
@@ -605,8 +614,13 @@ class MGProductImport
 				foreach($items as $item){
 					$fp = Mage::getBaseDir("media") . DS . "catalog" . DS . "product" . $item["file"];
 					unlink($fp);
-					$media->remove($mprod->getId(), $item["file"]);
-					MGProductImport::log("deleteImageGalleries(): delete: " . $item["file"] . PHP_EOL);
+					try{
+						$media->remove($mprod->getId(), $item["file"]);
+						MGProductImport::log("deleteImageGalleries(): delete: " . $item["file"] . PHP_EOL);
+					}
+					catch(Exception $ee){
+						print "" . $ee->getMessage();
+					}
 				}
 			}
 			catch(Exception $e){ 
@@ -617,23 +631,40 @@ class MGProductImport
 	}
 
 	/*
-	Imports downloaded images
+	Imports downloaded category images
 	*/
-	static public function importImages()
-	{	
-		MGProductImport::log("importImages(): " . PHP_EOL);
+	static public function importCategoryImages($coll=null)
+	{
+		MGProductImport::log("importCategoryImages(): " . PHP_EOL);
 		MGProductImport::initMagento();
-		$visibility = array("image", "small_image", "thumbnail");
-		$label = "the1st";
-		$coll = Mage::getModel("catalog/category")->getCollection();
+		if(null == $coll){
+			$coll = Mage::getModel("catalog/category")->getCollection();
+		}
 		foreach($coll as $cat){
 			$cat = $cat->load($cat->getId());
 			$cat->setStoreId(0);
 			$cat->setThumbnail($cat->getImage());
 			$cat->save();
-			MGProductImport::log("importImages(): cat: " . $cat->getImage() . PHP_EOL);
+			$target = Mage::getBaseDir("media") . DS . "import" . DS . $cat->getImage();
+			$dest = Mage::getBaseDir("media") . DS . "catalog" . DS . "category" . DS . $cat->getImage();
+			copy($target, $dest);
+			MGProductImport::log("importCategoryImages(): cat: " . $cat->getImage() . PHP_EOL);
 		}
-		$coll = Mage::getModel("catalog/product")->getCollection();
+		return true;
+	}
+	
+	/*
+	Imports downloaded product images
+	*/
+	static public function importProductImages($coll=null)
+	{	
+		MGProductImport::log("importProductImages(): " . PHP_EOL);
+		MGProductImport::initMagento();
+		$label = "the1stImage";
+		$visibility = array("image", "small_image", "thumbnail");
+		if(null == $coll){
+			$coll = Mage::getModel("catalog/product")->getCollection();
+		}
 		foreach($coll as $product){
 			$product = $product->load($product->getId());
 			// Writes new image collection
@@ -869,7 +900,8 @@ class MGImportSettings
 	const CATEGORY = "category";
 	// 
 	const CATPREFIX = "999";
-	// 
+	// 1 is magic
+	// 3 is Mage::app()->getStore()->getRootCategoryId();
 	const ROOTCATS = "1/3/";
 }
 
