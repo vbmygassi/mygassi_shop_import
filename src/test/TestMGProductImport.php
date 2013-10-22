@@ -12,8 +12,8 @@ class TestMGProductImport
 
 	static public function testParseProductlist()
 	{
-		$doc = MGProductImport::fetchProductlist();
-		$res = MGProductImport::parseProductlist($doc);
+		$res = TestMGPProductImport::doc;
+		$res = TestMGPProductImport::itemlist;
 		if(false == $res){
 			print "TestMGProductImport::testParseProductlist: doc is false\n";
 			return false;
@@ -84,9 +84,7 @@ class TestMGProductImport
 
 	static public function testImportItems()
 	{
-		$doc = MGProductImport::fetchProductlist();
-		$productlist = MGProductImport::parseProductlist($doc);
-		$res = MGProductImport::importItems($productlist);
+		$res = MGProductImport::importItems(MGProductImport::$itemlist);
 		return $res;
 	}
 
@@ -97,11 +95,11 @@ class TestMGProductImport
 	// from the export list (karlie service)
 	static public function testImportItemWithExportIndex($index)
 	{
-		$doc = MGProductImport::fetchProductlist();
-		$itemlist = MGProductImport::parseProductlist($doc);
+		$itemlist = MGProductImport::$itemlist;
 		$temp = new stdClass();
 		$temp->products = array(); 
 		foreach($itemlist->products as $item){
+			print $index . " : " . $item->sku . PHP_EOL;
 			switch($item->type){
 				// Products get selected by their SKU
 				case MGImportSettings::PRODUCT_DEFAULT:
@@ -127,9 +125,7 @@ class TestMGProductImport
 	// Selected by the Karlie export id
 	static public function testImportImageWithExportIndex($index)
 	{
-		$res = MGProductImport::initMagento();
-		$doc = MGProductImport::fetchProductlist();
-		$itemlist = MGProductImport::parseProductlist($doc);
+		$itemlist = MGProductImport::$itemlist;
 		foreach($itemlist->products as $item){
 			$coll = array();
 			switch($item->type){
@@ -159,24 +155,24 @@ class TestMGProductImport
 	
 	static public function testImportImages()
 	{
-		$doc = MGProductImport::fetchProductlist();
-		$itemlist = MGProductImport::parseProductlist($doc);
-		$res = MGProductImport::importCategoryImages($itemlist);
-		$res = MGProductImport::importProductImages($itemlist);
+		$res = MGProductImport::importCategoryImages();
+		$res = MGProductImport::importProductImages();
 		return $res;
 	}
 
 	static public function testDownloadImages()
 	{
-		$doc = MGProductImport::fetchProductlist();
-		$itemlist = MGProductImport::parseProductlist($doc);
+		/*
+		$itemlist = MGProductImport::$itemlist;
 		$items = array();
 		$items = new stdClass();
 		$items->products = array();
 		foreach($itemlist->products as $item){
 			$items->products[] =$items;
 		}
-		$res = MGProductImport::importCategoryImages($items);
+		// $res = MGProductImport::importCategoryImages($items);
+		*/
+		$res = MGProductImport::downloadImages();
 		return $res;
 	}
 
@@ -198,7 +194,7 @@ class TestMGProductImport
 
 	static public function testBackupProducts()
 	{
-		$res =MGProductImport::backupProducts();
+		$res = MGProductImport::backupProducts();
 		return $res;
 	}
 
@@ -234,8 +230,7 @@ class TestMGProductImport
 
 	static public function testBatchImport()
 	{
-		$doc = MGProductImport::fetchProductlist();
-		$itemlist = MGProductImport::parseProductlist($doc);
+		$itemlist = MGProductImport::$itemlist;
 		foreach($itemlist->products as $item){
 			$res = TestMGProductImport::testImportItemWithExportIndex($item->id);
 			$res = TestMGProductImport::testImportImageWithExportIndex($item->id);
@@ -244,18 +239,18 @@ class TestMGProductImport
 	}
 }
 
-
+MGProductImport::$itemlist = MGProductImport::parseProductlist(MGProductImport::fetchProductlist());
 
 // TestMGProductImport::testDeleteImageGalleries();
 // TestMGProductImport::testDeleteCategories();
 // TestMGProductImport::testDeleteProducts();
 
-// TestMGProductImport::testImportItems();
-// TestMGProductImport::testDownloadImages();
-// TestMGProductImport::testImportImages();
-// TestMGProductImport::testCleanMagentoCache();
+TestMGProductImport::testImportItems();
+TestMGProductImport::testDownloadImages();
+TestMGProductImport::testImportImages();
+TestMGProductImport::testCleanMagentoCache();
 
-// TestMGProductImport::testFillImageCache();
+TestMGProductImport::testFillImageCache();
 
 /*
 TestMGProductImport::testImportImageWithExportIndex("191919191");
@@ -267,4 +262,4 @@ TestMGProductImport::testReindexMagento();
 
 // TestMGProductImport::testBatchImport();
 // TestMGProductImport::testImportItemWithExportIndex("87051");
-TestMGProductImport::testImportImageWithExportIndex("87051");
+// TestMGProductImport::testImportImageWithExportIndex("87051");

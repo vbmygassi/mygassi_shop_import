@@ -62,9 +62,16 @@ class MGProductImport
 	{
 		MGProductImport::log("parseProductlist(): " . PHP_EOL);
 		$result = false;
+		
 		switch(MGImportSettings::DOCTYPE){
 			case MGImportSettings::JSON:
 				$result = json_decode($productlist);
+				// Workaround (as for the missing ids (in some documents))
+				foreach($result->products as $key=>$value){
+					if(!isset($value->id)){
+						$value->id = $key;	
+					}
+				}
 				break;
 		}
 		return $result;
@@ -243,7 +250,6 @@ class MGProductImport
 		}
 		return; 
 	}
-	*/
 
 	/*
 	Imports the products of a product list into the Mage DB
@@ -635,7 +641,7 @@ class MGProductImport
 	*/
 	static public function importCategoryImages($coll=null)
 	{
-		MGProductImport::log("importCategoryImages(): " . PHP_EOL);
+		MGProductImport::log("importCategoryImages(): " . $coll . PHP_EOL);
 		MGProductImport::initMagento();
 		if(null == $coll){
 			$coll = Mage::getModel("catalog/category")->getCollection();
@@ -705,8 +711,8 @@ class MGProductImport
 				case null:
 					continue;
 			}
-			$target = MGImportSettings::IMAGEDOWNLOAD . $product->getImage();
-			$dest = Mage::getBaseDir("media") . DS . "import" . $product->getImage();
+			$target = MGImportSettings::IMAGEDOWNLOAD . DS . $product->getImage();
+			$dest = Mage::getBaseDir("media") . DS . "import" . DS . $product->getImage();
 			$fp = fopen($dest, "w");
 			$ch = curl_init($target);
 			curl_setopt($ch, CURLOPT_TIMEOUT, 120);
@@ -878,19 +884,22 @@ class MGProductImport
 		}
 	}
 
+	/*
+	Downloaded list of items
+	*/
+	static public $itemlist;
+
 }
 
 class MGImportSettings
 {
 	const JSON = 0; const XML = 1;
 	const DOCTYPE = MGImportSettings::JSON;
-	
 	// const PRODUCTLIST = "http://10.14.10.37/karlie/index.php?forward=webservice/mygassi/view.php";
-	// const PRODUCTLIST = "http://10.14.10.37/karlie/index.php?forward=webservice/mygassi/view_status.php&status=3";
-	const PRODUCTLIST = "http://127.0.0.1/testexport/eximp.php";
+	const PRODUCTLIST = "http://10.14.10.37/karlie/index.php?forward=webservice/mygassi/view_status.php&status=3";
+	// const PRODUCTLIST = "http://127.0.0.1/testexport/eximp.php";
  	// const PRODUCTLIST = "http://127.0.0.1/testexport/eximp3.php";
-
-	const IMAGEDOWNLOAD = "http://127.0.0.1/testexport/data/images";
+	const IMAGEDOWNLOAD = "http://10.14.10.20/mygassipic/";
 	const SQLLITE = "./db/sqllite.db";
 	const SQLLITEBCKPP = "./db/bckpp/sqllite.db";
 	const CSVEXPORT = "./export/product-import.csv";
