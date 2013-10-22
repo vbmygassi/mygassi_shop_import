@@ -846,9 +846,9 @@ class MGProductImport
 	/*
 	Deletes Magento Cache
 	*/
-	static public function cleanMagentoCache()
+	static public function cleanImageCache()
 	{
-		MGProductImport::log("cleanMagentoCache(): " . PHP_EOL);
+		MGProductImport::log("cleanImageCache(): " . PHP_EOL);
 		require_once(MGImportSettings::MAGEROOT);
 		Mage::app()->cleanCache();
 		return true;

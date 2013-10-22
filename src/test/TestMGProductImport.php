@@ -210,9 +210,9 @@ class TestMGProductImport
 		return $res;
 	}
 
-	static public function testCleanMagentoCache()
+	static public function testCleanImageCache()
 	{
-		$res = MGProductImport::cleanMagentoCache();
+		$res = MGProductImport::cleanImageCache();
 		return $res;
 	}
 
