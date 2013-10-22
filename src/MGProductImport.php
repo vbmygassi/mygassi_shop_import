@@ -281,7 +281,7 @@ class MGProductImport
 		$cat = new Mage_Catalog_Model_Category();
 		$cat->setStoreId(0);
 		$cat->setId($cid);
-		$cat->setName($group->name);
+		$cat->setName(trim($group->name));
 		$cat->setErpId($group->erp_id);
 		$cat->setIsActive(1);
 		$cat->setPath(""
@@ -480,16 +480,26 @@ class MGProductImport
 		// $mprod->setStatus($product->status);
 		$mprod->setTaxClassId(1);
 		$mprod->setIsTopProduct($product->top);
-		$mprod->setErp($product->erp);
+		$mprod->setErp($product->erp_id);
 		$mprod->setPrice($product->price);
-		$mprod->setRrp($product->rrp);
+		$mprod->setRrp($product->suggested_reatial_price);
 		$mprod->setBase($product->base);
 		
 		// sets linked group ids
-		$mprod->setGroupId($product->category_ids);
+		// $mprod->setGroupId($product->category_ids);
 		
-		$mprod->setTypeId("simple");
+		$mprod->setColor($product->color);
+		$mprod->setWidth($product->width);
+		$mprod->setHeight($product->height);
+		$mprod->setDiameter($product->diameter);
+		$mprod->setVolume($product->volume);
+		$mprod->setSize($product->price);
+		$mprod->setIsTopProduct($product->top_product);
+		$mprod->setIsStreamProduct($product->stream_product);
+		$mprod->setCreated($product->created);		
+		$mprod->setSyncKarlie($product->sync_karlie);		
 	
+		$mprod->setTypeId("simple");
 		$mprod->setSmallImage($product->image);
 		$mprod->setThumbnail($product->image);
 		$mprod->setImage($product->image);
@@ -513,7 +523,7 @@ class MGProductImport
 		
 		// Logs import
 		MGProductImport::log(
-			"importProducts(): " 
+			"importProduct(): " 
 			. $mprod->getSku() 
 			. ": " 
 			. $mprod->getId() 
@@ -568,15 +578,15 @@ class MGProductImport
 				. " : simple : "
 				. $product->getSku()
 				. PHP_EOL
-			);
-			try{
+				);
+				try{
 				// $pl->assign("grouped", $item->getId(), $product->getId()); 
 				// $item->setAssociatedProduct($product);
 				// $product->setParentId(array($item->getId()));
 				// $item->getTypeInstance(true)->setAssociatedProducts(array($product));
 				$item->getTypeInstance(true)->setUsedProductAttributeIds(array($product->getId()));
 				$item->save();
-			}
+			}											
 			catch(Exception $e){
 				MGProductImport::log("linkProducts(): Exception: " . $e->getMessage() . PHP_EOL);
 			}
@@ -588,17 +598,12 @@ class MGProductImport
 	*/
 	static public function deleteImageGalleries()
 	{
+		// crashes for some reason...
+		return;
 		MGProductImport::log("deleteImageGalleries(): " . PHP_EOL);
 		MGProductImport::initMagento($admin=true);
 		$coll = Mage::getModel("catalog/product")->getCollection();
 		
-
-
-		// crashes for some reason...
-		return;
-
-
-
 		foreach($coll as $product){
 			$mprod = Mage::getModel("catalog/product")->loadByAttribute("sku", $product->sku);
 			if(null == $mprod){
@@ -614,13 +619,8 @@ class MGProductImport
 				foreach($items as $item){
 					$fp = Mage::getBaseDir("media") . DS . "catalog" . DS . "product" . $item["file"];
 					unlink($fp);
-					try{
-						$media->remove($mprod->getId(), $item["file"]);
-						MGProductImport::log("deleteImageGalleries(): delete: " . $item["file"] . PHP_EOL);
-					}
-					catch(Exception $ee){
-						print "" . $ee->getMessage();
-					}
+					$media->remove($mprod->getId(), $item["file"]);
+					MGProductImport::log("deleteImageGalleries(): delete: " . $item["file"] . PHP_EOL);
 				}
 			}
 			catch(Exception $e){ 
@@ -648,7 +648,7 @@ class MGProductImport
 			$target = Mage::getBaseDir("media") . DS . "import" . DS . $cat->getImage();
 			$dest = Mage::getBaseDir("media") . DS . "catalog" . DS . "category" . DS . $cat->getImage();
 			copy($target, $dest);
-			MGProductImport::log("importCategoryImages(): cat: " . $cat->getImage() . PHP_EOL);
+			MGProductImport::log("importCategoryImages(): cat: " . $cat->getId() . " : " . $target . PHP_EOL);
 		}
 		return true;
 	}
@@ -667,6 +667,7 @@ class MGProductImport
 		}
 		foreach($coll as $product){
 			$product = $product->load($product->getId());
+
 			// Writes new image collection
 			$target = Mage::getBaseDir("media") . DS . "import" . DS . $product->getImage();
 			try{
@@ -674,7 +675,8 @@ class MGProductImport
 				MGProductImport::log("importImages(): prod: " . $target . PHP_EOL);
 			}
 			catch(Exception $e){
-				MGProductImport::log("Here is your Exception dump while importing image assets: " . $e->getMessage() . PHP_EOL);
+				MGProductImport::log("Exception dump while importing image assets: " . $e->getMessage() . " : ");
+				MGProductImport::log($target . PHP_EOL);
 			}
 			// Adds label to the imported image
 			$gall = $product->getData("media_gallery");
@@ -698,8 +700,13 @@ class MGProductImport
 		$coll = Mage::getModel("catalog/product")->getCollection();
 		foreach($coll as $product){
 			$product = $product->load($product->getId());
+			switch($product->getImages()){
+				case "":
+				case null:
+					continue;
+			}
 			$target = MGImportSettings::IMAGEDOWNLOAD . $product->getImage();
-			$dest = Mage::getBaseDir("media") . DS . "import" . DS . $product->getImage();
+			$dest = Mage::getBaseDir("media") . DS . "import" . $product->getImage();
 			$fp = fopen($dest, "w");
 			$ch = curl_init($target);
 			curl_setopt($ch, CURLOPT_TIMEOUT, 120);
@@ -710,7 +717,8 @@ class MGProductImport
 			$res = curl_close($ch);
 			MGProductImport::log("downloadImages(): target: " . $target . PHP_EOL);
 			MGProductImport::log("downloadImages(): dest: " . $dest . PHP_EOL);
-			fclose($fp);
+			$res = fclose($fp);
+			$res = curl_close($c);
 		}
 		return true;
 	}
@@ -876,8 +884,13 @@ class MGImportSettings
 {
 	const JSON = 0; const XML = 1;
 	const DOCTYPE = MGImportSettings::JSON;
-	const PRODUCTLIST = "http://127.0.0.1/testexport/eximp.php";	
-	const IMAGEDOWNLOAD = "http://127.0.0.1/testexport/data/images/";
+	
+	// const PRODUCTLIST = "http://10.14.10.37/karlie/index.php?forward=webservice/mygassi/view.php";
+	// const PRODUCTLIST = "http://10.14.10.37/karlie/index.php?forward=webservice/mygassi/view_status.php&status=3";
+	const PRODUCTLIST = "http://127.0.0.1/testexport/eximp.php";
+ 	// const PRODUCTLIST = "http://127.0.0.1/testexport/eximp3.php";
+
+	const IMAGEDOWNLOAD = "http://127.0.0.1/testexport/data/images";
 	const SQLLITE = "./db/sqllite.db";
 	const SQLLITEBCKPP = "./db/bckpp/sqllite.db";
 	const CSVEXPORT = "./export/product-import.csv";

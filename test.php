@@ -1,29 +1,30 @@
 <?php
-require_once("/Users/vico/Workspace/MyGassiShop/app/Mage.php");
-Mage::app();
+$conn = mysqli_connect("localhost", "root", "2317.187.fuckingsuck", "fuck");
+if(mysqli_connect_errno()){
+	print "Error Bäbeh: " . mysqli_connect_error() . "\n";
+	exit(1);
+}
 
+// $sql = "insert into fuck (id, text) values ('5', 'fuckär')";
 
+$sql  = "";;
+$sql .= "create procedure if not exist Fuck(Message TEXT) ";
+$sql .= "begin ";
+$sql .= "insert into fuck (id, text) values (2, 'muddi');";
+$sql .= "end";
 
+print $sql; 
+print "\n";
 
-$cat = Mage::getModel("catalog/category")->load(99916);
+$res = mysqli_query($conn, $sql);
 
+print $res; 
+print "\n";
 
+if(!($res = mysqli_prepare($conn, 'Fuck("theWaldfee")'))){
+}
 
-print_r($cat->debug());
-print PHP_EOL;
-print "getImageUrl()";
-print_r($cat->getImageUrl());
-print PHP_EOL;
-print "getThumbnail()";
-print_r($cat->getThumbnail());
-print PHP_EOL;
-print "getImage()";
-print_r($cat->getImage());
-print PHP_EOL;
-print "getSmallImage()";
-print_r($cat->getSmallImage());
+$res->execute();
 
-
-
-$catId = Mage::app()->getStore()->getRootCategoryId();
-print_r($catId);
+print $res; 
+print "\n";
