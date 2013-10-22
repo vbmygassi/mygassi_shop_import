@@ -292,7 +292,7 @@ class MGProductImport
 		$cat->setIsActive(1);
 		$cat->setPath(""
 			. MGImportSettings::ROOTCATS 
-			. MGImportSettings::CATPREFIX . $group->category_ids . "/" 
+			. MGImportSettings::CATPREFIX . $group->category_ids . DS 
 			. $cid
 		);
 		$cat->setParentId(MGImportSettings::CATPREFIX . $group->category_ids);
