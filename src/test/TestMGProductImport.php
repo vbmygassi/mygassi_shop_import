@@ -237,20 +237,28 @@ class TestMGProductImport
 		}
 		return $res;
 	}
+
+	static public function testImportImages2($skus)
+	{
+		foreach($skus as $sku){
+			MGProductImport::importImageOfProduct($sku);
+		}				
+	}
 }
 
-MGProductImport::$itemlist = MGProductImport::parseProductlist(MGProductImport::fetchProductlist());
+TestMGProductImport::testFetchProductlist();
 
-// TestMGProductImport::testDeleteImageGalleries();
-// TestMGProductImport::testDeleteCategories();
+// TestMGProductImport::testImportImages2(array("1", "31473"));
+
+TestMGProductImport::testDeleteImageGalleries();
+TestMGProductImport::testDeleteCategories();
 // TestMGProductImport::testDeleteProducts();
-
 TestMGProductImport::testImportItems();
-TestMGProductImport::testDownloadImages();
-TestMGProductImport::testImportImages();
-TestMGProductImport::testCleanMagentoCache();
+TestMGProductImport::testCleanImageCache();
 
-TestMGProductImport::testFillImageCache();
+// TestMGProductImport::testDownloadImages();
+TestMGProductImport::testImportImages();
+// TestMGProductImport::testFillImageCache();
 
 /*
 TestMGProductImport::testImportImageWithExportIndex("191919191");

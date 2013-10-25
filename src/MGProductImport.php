@@ -16,13 +16,14 @@
 
 class MGProductImport
 {
+		
 	/*
 	Fetches a product import list (XML, JSON) from a given HOST | SERVICE
 	returns object productList;
 	*/
 	static public function fetchProductlist()
 	{
-		MGProductImport::log("fetchProductlist(): " . PHP_EOL);
+		MGProductImport::log("fetchProductlist(): " . MGImportSettings::PRODUCTLIST. PHP_EOL);
 		$c = curl_init(MGImportSettings::PRODUCTLIST);
 		$res = curl_setopt($c, CURLOPT_RETURNTRANSFER, 1);
 		$productlist = curl_exec($c); 
@@ -421,21 +422,21 @@ class MGProductImport
 		$newProduct = false;
 			
 		// Reads ref product from product list
-		/*
 		if(null == $mprod){
 			MGProductImport::log("Adding a new product" . PHP_EOL);
 			$mprod = Mage::getModel("catalog/product")->getCollection()->getFirstItem();
 			$newProduct = true;
 		}
-		*/
 			
 		// Reads ref product: 
+		/*
 		if(null == $mprod){
 			$chunk = file_get_contents(MGImportSettings::REFPROD);
 			$mprod = unserialize($chunk);
 			$newProduct = true;
 		}
-			
+		*/
+	
 		// Loads product
 		$mprod = $mprod->load($mprod->getId());
 		
@@ -606,6 +607,7 @@ class MGProductImport
 	{
 		// crashes for some reason...
 		return;
+
 		MGProductImport::log("deleteImageGalleries(): " . PHP_EOL);
 		MGProductImport::initMagento($admin=true);
 		$coll = Mage::getModel("catalog/product")->getCollection();
@@ -649,10 +651,16 @@ class MGProductImport
 		foreach($coll as $cat){
 			$cat = $cat->load($cat->getId());
 			$cat->setStoreId(0);
-			$cat->setThumbnail($cat->getImage());
+			$img = $cat->getImage();
+			switch($img){
+				case null:
+				case "":
+					$img = "test.png";
+			}
+			$cat->setThumbnail($img);
 			$cat->save();
-			$target = Mage::getBaseDir("media") . DS . "import" . DS . $cat->getImage();
-			$dest = Mage::getBaseDir("media") . DS . "catalog" . DS . "category" . DS . $cat->getImage();
+			$target = Mage::getBaseDir("media") . DS . "import" . DS . $img;
+			$dest = Mage::getBaseDir("media") . DS . "catalog" . DS . "category" . DS . $img;
 			copy($target, $dest);
 			MGProductImport::log("importCategoryImages(): cat: " . $cat->getId() . " : " . $target . PHP_EOL);
 		}
@@ -673,12 +681,17 @@ class MGProductImport
 		}
 		foreach($coll as $product){
 			$product = $product->load($product->getId());
-
 			// Writes new image collection
-			$target = Mage::getBaseDir("media") . DS . "import" . DS . $product->getImage();
+			$img = $product->getImage();
+			switch($img){
+				case "":
+				case null:
+					$img = "test.png";
+			}
+			$target = Mage::getBaseDir("media") . DS . "import" . DS . $img;
 			try{
 				$product->addImageToMediaGallery($target, $visibility, false, false);
-				MGProductImport::log("importImages(): prod: " . $target . PHP_EOL);
+				MGProductImport::log("importImages(): sku: " . $product->getSku() . " target: " . $target . PHP_EOL);
 			}
 			catch(Exception $e){
 				MGProductImport::log("Exception dump while importing image assets: " . $e->getMessage() . " : ");
@@ -693,6 +706,76 @@ class MGProductImport
 			// Saves product
 			$product->save();
 		}	
+		return true;
+	}
+
+	/*
+	Import image of one item selected by sku
+	*/
+	static public function importImageOfProduct($sku)
+	{
+		MGProductImport::log("importImageOfProduct(): " . $sku . PHP_EOL);
+		MGProductImport::initMagento();
+		$prod = Mage::getModel("catalog/product")->loadByAttribute("sku", $sku);
+		if(null == $prod){
+			MGProductImport::log("importImageOfProduct(): no such product: " . $sku . PHP_EOL);
+			return false;
+		}
+		$prod = $prod->load($prod->getSku());
+		$image = $prod->getImage();
+		switch($image){
+			case null:
+			case "":
+				MGProductImport::log("importImageOfProduct(): no image in record: " . $sku . PHP_EOL);
+				return false;
+		}	
+
+		// RSYNCs the image
+		$target = MGImportSettings::RSYNC . "&sku=" . $prod->getSku();	
+		MGProductImport::log("importImageOfProduct(): rsync: " . $target . " : " . $image . PHP_EOL);
+		$ch = curl_init($target);
+		curl_setopt($ch, CURLOPT_TIMEOUT, 120);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		$res = curl_exec($ch);
+		print $res; 
+		$res = curl_close($ch);
+		
+		// Downloads image
+		// (There is no need for a download... it is a test issue...
+		$target = MGImportSettings::IMAGEDOWNLOAD . DS . $image;
+		$dest = Mage::getBaseDir("media") . DS . "import" . DS . $image;
+		$fp = fopen($dest, "w");
+		$ch = curl_init($target);
+		curl_setopt($ch, CURLOPT_TIMEOUT, 120);
+		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		curl_setopt($ch, CURLOPT_FILE, $fp);
+		$res = curl_exec($ch);
+		$res = curl_close($ch);
+		MGProductImport::log("importImageOfProduct(): download: " . $target . PHP_EOL);
+		MGProductImport::log("downloadImages(): dest: " . $dest . PHP_EOL);
+		$res = fclose($fp);
+		return false;
+
+		// Imports image asset into magento
+		$label = "the1stImage";
+		$target = Mage::getBaseDir("media") . DS . "import" . DS . $image;
+		try{
+			$prod->addImageToMediaGallery($target, $visibility, false, false);
+			MGProductImport::log("importImageOfProduct(): image imported: " . $target . PHP_EOL);
+		}
+		catch(Exception $e){
+			MGProductImport::log("Exception dump while importing image assets: " . $e->getMessage() . " : ");
+			MGProductImport::log($target . PHP_EOL);
+			return false;
+		}
+		// Adds label to the imported image
+		$gall = $prod->getData("media_gallery");
+		$temp = array_pop($gall["images"]);
+		$temp["label"] = $label;
+		array_push($gall["images"], $temp);
+		$prod->setData("media_gallery", $gall);
+		$prod->save();
 		return true;
 	}
 
@@ -727,6 +810,7 @@ class MGProductImport
 			$res = curl_close($c);
 		}
 		return true;
+		$visibility = array("image", "small_image", "thumbnail");
 	}
 
 	/*
@@ -840,6 +924,7 @@ class MGProductImport
 		}
 		MGProductImport::$minited = true;
 		MGProductImport::log("initMagento(): " . PHP_EOL);
+		// MGImportSettings::ROOTCATS = "1/" . Mage::app()->getStore()->getRootCategoryId() . "/";
 		return true;
 	}
 	
@@ -896,16 +981,16 @@ class MGImportSettings
 	const JSON = 0; const XML = 1;
 	const DOCTYPE = MGImportSettings::JSON;
 	// const PRODUCTLIST = "http://10.14.10.37/karlie/index.php?forward=webservice/mygassi/view.php";
-	const PRODUCTLIST = "http://10.14.10.37/karlie/index.php?forward=webservice/mygassi/view_status.php&status=3";
-	// const PRODUCTLIST = "http://127.0.0.1/testexport/eximp.php";
+	// const PRODUCTLIST = "http://10.14.10.37/karlie/index.php?forward=webservice/mygassi/view_status.php&status=3";
+	const PRODUCTLIST = "http://127.0.0.1/testexport/eximp.php";
  	// const PRODUCTLIST = "http://127.0.0.1/testexport/eximp3.php";
-	const IMAGEDOWNLOAD = "http://10.14.10.20/mygassipic/";
 	const SQLLITE = "./db/sqllite.db";
 	const SQLLITEBCKPP = "./db/bckpp/sqllite.db";
 	const CSVEXPORT = "./export/product-import.csv";
 	const XMLEXPORT = "./export/product-import.xml";
 	const PHPEXPORT = "./export/product-export.php";
-	const MAGEROOT = "/Users/vico/Workspace/MyGassiShop/app/Mage.php";
+	// const MAGEROOT = "/Users/vico/Workspace/MyGassiShop/app/Mage.php";
+	const MAGEROOT = "/Users/vico/Workspace/MyGassiShop2/app/Mage.php";
 	const REFPROD = "./data/mprod.php";
 	const SQLDUMP = "./export/sqldump/";
 	const MAGEDBUSER = "root";
@@ -925,6 +1010,9 @@ class MGImportSettings
 	// 1 is magic
 	// 3 is Mage::app()->getStore()->getRootCategoryId();
 	const ROOTCATS = "1/3/";
+	//
+	const RSYNC = "http://10.14.10.37/karlie/index.php?forward=webservice/mygassi/image_export.php";
+	// const IMAGEDOWNLOAD = "http://10.14.10.20/mygassipic/";
+	const IMAGEDOWNLOAD = "http://10.14.10.20/mygassipic_new/";
 }
-
 
