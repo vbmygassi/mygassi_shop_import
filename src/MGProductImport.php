@@ -634,7 +634,10 @@ class MGProductImport
 		}
 		return true;
 	}
-	
+
+	/*
+	Imports all images
+	*/	
 	static public function importImages()
 	{
 		MGProductImport::log("importImages(): " . PHP_EOL);
@@ -671,8 +674,13 @@ class MGProductImport
 			case null:
 			case "":
 				MGProductImport::log("importImageOfProduct(): no image in record: " . $sku . PHP_EOL);
-				$image = "test.png";
-		}	
+				$image = "fantomas.png";
+		}
+
+		// Uha...
+		if(0 == strpos($image, "/") ){
+			$image = substr($image, 1, strlen($image));
+		}
 
 		// RSYNCs the image
 		$target = MGImportSettings::RSYNC . "&sku=" . $prod->getSku();	
@@ -685,7 +693,7 @@ class MGProductImport
 		
 		// Downloads image
 		// (There is no need for a download... it is a test issue...
-		$target = MGImportSettings::IMAGEDOWNLOAD . DS . $image;
+		$target = MGImportSettings::IMAGEDOWNLOAD . $image;
 		$dest = Mage::getBaseDir("media") . DS . "import" . DS . $image;
 		$fp = fopen($dest, "w");
 		$ch = curl_init($target);
@@ -695,9 +703,9 @@ class MGProductImport
 		curl_setopt($ch, CURLOPT_FILE, $fp);
 		$res = curl_exec($ch);
 		$res = fclose($fp);
+		$res = curl_close($ch);
 		MGProductImport::log("importImageOfProduct(): download: " . $target . PHP_EOL);
 		MGProductImport::log("downloadImages(): dest: " . $dest . PHP_EOL);
-		$res = curl_close($ch);
 
 		// Deletes existing image gallery
 		$mediaApi = Mage::getModel("catalog/product_attribute_media_api");
@@ -721,6 +729,7 @@ class MGProductImport
 			MGProductImport::log("Exception dump while importing image assets: " . $e->getMessage() . " : ");
 			MGProductImport::log($target . PHP_EOL);
 		}
+		
 		// Adds label to the imported image
 		$gall = $prod->getData("media_gallery");
 		$temp = array_pop($gall["images"]);
@@ -747,7 +756,7 @@ class MGProductImport
 				case null:
 					continue;
 			}
-			$target = MGImportSettings::IMAGEDOWNLOAD . DS . $product->getImage();
+			$target = MGImportSettings::IMAGEDOWNLOAD . $product->getImage();
 			$dest = Mage::getBaseDir("media") . DS . "import" . DS . $product->getImage();
 			$fp = fopen($dest, "w");
 			$ch = curl_init($target);
@@ -763,7 +772,6 @@ class MGProductImport
 			$res = curl_close($c);
 		}
 		return true;
-		$visibility = array("image", "small_image", "thumbnail");
 	}
 
 	/*
