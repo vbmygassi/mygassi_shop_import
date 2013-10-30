@@ -63,7 +63,6 @@ class MGProductImport
 	{
 		MGProductImport::log("parseProductlist(): " . PHP_EOL);
 		$result = false;
-		
 		switch(MGImportSettings::DOCTYPE){
 			case MGImportSettings::JSON:
 				$result = json_decode($productlist);
@@ -73,6 +72,7 @@ class MGProductImport
 						$value->id = $key;	
 					}
 				}
+				MGProductImport::$itemlist = $result;		
 				break;
 		}
 		return $result;
@@ -255,8 +255,9 @@ class MGProductImport
 	/*
 	Imports the products of a product list into the Mage DB
 	*/
-	static public function importItems($itemlist)
+	static public function importItems($list=null)
 	{
+		$itemlist = null == $list ? MGProductImport::$itemlist : $list;
 		MGProductImport::log("importItems(): " . PHP_EOL);
 		MGProductImport::initMagento();
 		foreach($itemlist->products as $item){
@@ -421,22 +422,27 @@ class MGProductImport
 		$mprod = Mage::getModel("catalog/product")->loadByAttribute("sku", $product->sku);
 		$newProduct = false;
 			
+		// Writes a new Product	
+		if(null == $mprod){
+			// $mprod = new Mage_Catalog_Model_Product();
+		}
+
 		// Reads ref product from product list
 		if(null == $mprod){
 			MGProductImport::log("Adding a new product" . PHP_EOL);
 			$mprod = Mage::getModel("catalog/product")->getCollection()->getFirstItem();
+			$mprod = unserialize($mprod);
 			$newProduct = true;
 		}
-			
+		
+	
 		// Reads ref product: 
-		/*
 		if(null == $mprod){
 			$chunk = file_get_contents(MGImportSettings::REFPROD);
 			$mprod = unserialize($chunk);
 			$newProduct = true;
 		}
-		*/
-	
+		
 		// Loads product
 		$mprod = $mprod->load($mprod->getId());
 		
@@ -601,44 +607,6 @@ class MGProductImport
 	}
 
 	/*
-	Deletes existing image galleries of products
-	*/
-	static public function deleteImageGalleries()
-	{
-		// crashes for some reason...
-		return;
-
-		MGProductImport::log("deleteImageGalleries(): " . PHP_EOL);
-		MGProductImport::initMagento($admin=true);
-		$coll = Mage::getModel("catalog/product")->getCollection();
-		
-		foreach($coll as $product){
-			$mprod = Mage::getModel("catalog/product")->loadByAttribute("sku", $product->sku);
-			if(null == $mprod){
-				continue;
-			}
-			$mprod = $mprod->load($mprod->getId());
-			// $mprod->setStoreId(MGProductImport::getStoreId("default"));
-			$mprod->setStoreId(0);
-			// Deletes exisiting image collection
-			try{
-				$media = Mage::getModel("catalog/product_attribute_media_api");
-				$items = $media->items($mprod->getId());
-				foreach($items as $item){
-					$fp = Mage::getBaseDir("media") . DS . "catalog" . DS . "product" . $item["file"];
-					unlink($fp);
-					$media->remove($mprod->getId(), $item["file"]);
-					MGProductImport::log("deleteImageGalleries(): delete: " . $item["file"] . PHP_EOL);
-				}
-			}
-			catch(Exception $e){ 
-				MGProductImport::log("Some Exception while deleteing ye old image gallery: " . $e->getMessage . PHP_EOL);
-			}
-			$mprod->save();
-		}
-	}
-
-	/*
 	Imports downloaded category images
 	*/
 	static public function importCategoryImages($coll=null)
@@ -667,48 +635,18 @@ class MGProductImport
 		return true;
 	}
 	
-	/*
-	Imports downloaded product images
-	*/
-	static public function importProductImages($coll=null)
-	{	
-		MGProductImport::log("importProductImages(): " . PHP_EOL);
+	static public function importImages()
+	{
+		MGProductImport::log("importImages(): " . PHP_EOL);
 		MGProductImport::initMagento();
-		$label = "the1stImage";
-		$visibility = array("image", "small_image", "thumbnail");
-		if(null == $coll){
-			$coll = Mage::getModel("catalog/product")->getCollection();
+		$coll = Mage::getModel("catalog/product")->getCollection();
+		foreach($coll as $prod){
+			$prod = $prod->load($prod->getId());
+			$sku = $prod->getSku();
+			MGProductImport::importImageOfProduct($sku);
 		}
-		foreach($coll as $product){
-			$product = $product->load($product->getId());
-			// Writes new image collection
-			$img = $product->getImage();
-			switch($img){
-				case "":
-				case null:
-					$img = "test.png";
-			}
-			$target = Mage::getBaseDir("media") . DS . "import" . DS . $img;
-			try{
-				$product->addImageToMediaGallery($target, $visibility, false, false);
-				MGProductImport::log("importImages(): sku: " . $product->getSku() . " target: " . $target . PHP_EOL);
-			}
-			catch(Exception $e){
-				MGProductImport::log("Exception dump while importing image assets: " . $e->getMessage() . " : ");
-				MGProductImport::log($target . PHP_EOL);
-			}
-			// Adds label to the imported image
-			$gall = $product->getData("media_gallery");
-			$temp = array_pop($gall["images"]);
-			$temp["label"] = $label;
-			array_push($gall["images"], $temp);
-			$product->setData("media_gallery", $gall);
-			// Saves product
-			$product->save();
-		}	
-		return true;
 	}
-
+	
 	/*
 	Import image of one item selected by sku
 	*/
@@ -716,18 +654,24 @@ class MGProductImport
 	{
 		MGProductImport::log("importImageOfProduct(): " . $sku . PHP_EOL);
 		MGProductImport::initMagento();
+		
+		// Evaluates product
 		$prod = Mage::getModel("catalog/product")->loadByAttribute("sku", $sku);
 		if(null == $prod){
 			MGProductImport::log("importImageOfProduct(): no such product: " . $sku . PHP_EOL);
 			return false;
 		}
+		
 		$prod = $prod->load($prod->getSku());
+		$prod->setStoreId(0);
+		
+		// Evaluates image
 		$image = $prod->getImage();
 		switch($image){
 			case null:
 			case "":
 				MGProductImport::log("importImageOfProduct(): no image in record: " . $sku . PHP_EOL);
-				return false;
+				$image = "test.png";
 		}	
 
 		// RSYNCs the image
@@ -737,7 +681,6 @@ class MGProductImport
 		curl_setopt($ch, CURLOPT_TIMEOUT, 120);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 		$res = curl_exec($ch);
-		print $res; 
 		$res = curl_close($ch);
 		
 		// Downloads image
@@ -751,12 +694,22 @@ class MGProductImport
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 		curl_setopt($ch, CURLOPT_FILE, $fp);
 		$res = curl_exec($ch);
-		$res = curl_close($ch);
+		$res = fclose($fp);
 		MGProductImport::log("importImageOfProduct(): download: " . $target . PHP_EOL);
 		MGProductImport::log("downloadImages(): dest: " . $dest . PHP_EOL);
-		$res = fclose($fp);
-		return false;
+		$res = curl_close($ch);
 
+		// Deletes existing image gallery
+		$mediaApi = Mage::getModel("catalog/product_attribute_media_api");
+		$items = $mediaApi->items($prod->getId());
+		$attributes = $prod->getTypeInstance()->getSetAttributes();
+		$gallery = $attributes['media_gallery'];
+		foreach($items as $item){
+			if ($gallery->getBackend()->getImage($prod, $item['file'])) {
+				$gallery->getBackend()->removeImage($prod, $item['file']);
+			}
+		}	
+		
 		// Imports image asset into magento
 		$label = "the1stImage";
 		$target = Mage::getBaseDir("media") . DS . "import" . DS . $image;
@@ -767,7 +720,6 @@ class MGProductImport
 		catch(Exception $e){
 			MGProductImport::log("Exception dump while importing image assets: " . $e->getMessage() . " : ");
 			MGProductImport::log($target . PHP_EOL);
-			return false;
 		}
 		// Adds label to the imported image
 		$gall = $prod->getData("media_gallery");
@@ -776,6 +728,7 @@ class MGProductImport
 		array_push($gall["images"], $temp);
 		$prod->setData("media_gallery", $gall);
 		$prod->save();
+		
 		return true;
 	}
 
@@ -939,6 +892,9 @@ class MGProductImport
 		return true;
 	}
 
+	/*
+	Evaluates store id by index "de" "en" (Store Views)
+	*/
 	static public function getStoreId($index)
 	{
 		MGProductImport::log("getStoreId(): " . $index . PHP_EOL);
@@ -990,7 +946,7 @@ class MGImportSettings
 	const XMLEXPORT = "./export/product-import.xml";
 	const PHPEXPORT = "./export/product-export.php";
 	// const MAGEROOT = "/Users/vico/Workspace/MyGassiShop/app/Mage.php";
-	const MAGEROOT = "/Users/vico/Workspace/MyGassiShop2/app/Mage.php";
+	const MAGEROOT = "/Users/vico/Workspace/MyGassiShop/app/Mage.php";
 	const REFPROD = "./data/mprod.php";
 	const SQLDUMP = "./export/sqldump/";
 	const MAGEDBUSER = "root";

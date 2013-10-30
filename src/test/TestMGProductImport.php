@@ -7,15 +7,15 @@ class TestMGProductImport
 	{
 		$doc = MGProductImport::fetchProductlist();	
 		print $doc; 
+		print PHP_EOL;
 		return true;
 	}
 
 	static public function testParseProductlist()
 	{
-		$res = TestMGPProductImport::doc;
-		$res = TestMGPProductImport::itemlist;
+		$res = MGProductImport::$itemlist;
 		if(false == $res){
-			print "TestMGProductImport::testParseProductlist: doc is false\n";
+			print "TestMGProductImport::testParseProductlist: itemlist is false\n";
 			return false;
 		}
 		switch(MGImportSettings::DOCTYPE){
@@ -24,7 +24,7 @@ class TestMGProductImport
 				break;
 		}
 		if(null == $res){
-			print "TestMGProductImport::testParseProductlist: doc is null\n";
+			print "TestMGProductImport::testParseProductlist: itemlist is null\n";
 			return false;
 		}
 		print_r($res);
@@ -84,7 +84,7 @@ class TestMGProductImport
 
 	static public function testImportItems()
 	{
-		$res = MGProductImport::importItems(MGProductImport::$itemlist);
+		$res = MGProductImport::importItems();
 		return $res;
 	}
 
@@ -153,25 +153,8 @@ class TestMGProductImport
 		return $res;
 	}
 	
-	static public function testImportImages()
-	{
-		$res = MGProductImport::importCategoryImages();
-		$res = MGProductImport::importProductImages();
-		return $res;
-	}
-
 	static public function testDownloadImages()
 	{
-		/*
-		$itemlist = MGProductImport::$itemlist;
-		$items = array();
-		$items = new stdClass();
-		$items->products = array();
-		foreach($itemlist->products as $item){
-			$items->products[] =$items;
-		}
-		// $res = MGProductImport::importCategoryImages($items);
-		*/
 		$res = MGProductImport::downloadImages();
 		return $res;
 	}
@@ -195,12 +178,6 @@ class TestMGProductImport
 	static public function testBackupProducts()
 	{
 		$res = MGProductImport::backupProducts();
-		return $res;
-	}
-
-	static public function testDeleteImageGalleries()
-	{
-		$res = MGProductImport::deleteImageGalleries();
 		return $res;
 	}
 
@@ -244,20 +221,25 @@ class TestMGProductImport
 			MGProductImport::importImageOfProduct($sku);
 		}				
 	}
+
+	static public function testImportImages3()
+	{
+		MGProductImport::importImages();
+	}
 }
 
-TestMGProductImport::testFetchProductlist();
+// ugly ugly...
+MGProductImport::parseProductlist(MGProductImport::fetchProductlist());
 
-// TestMGProductImport::testImportImages2(array("1", "31473"));
-
-TestMGProductImport::testDeleteImageGalleries();
 TestMGProductImport::testDeleteCategories();
-// TestMGProductImport::testDeleteProducts();
+TestMGProductImport::testDeleteProducts();
 TestMGProductImport::testImportItems();
 TestMGProductImport::testCleanImageCache();
 
+// TestMGProductImport::testImportImages2(array("1", "31473"));
+TestMGProductImport::testImportImages3();
+
 // TestMGProductImport::testDownloadImages();
-TestMGProductImport::testImportImages();
 // TestMGProductImport::testFillImageCache();
 
 /*
