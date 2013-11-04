@@ -230,15 +230,13 @@ class TestMGProductImport
 
 // ugly ugly...
 MGProductImport::parseProductlist(MGProductImport::fetchProductlist());
-
 TestMGProductImport::testDeleteCategories();
 TestMGProductImport::testDeleteProducts();
 TestMGProductImport::testImportItems();
 TestMGProductImport::testCleanImageCache();
-
-// TestMGProductImport::testImportImages2(array("1", "31473"));
 TestMGProductImport::testImportImages3();
 
+// TestMGProductImport::testImportImages2(array("1", "31473"));
 // TestMGProductImport::testDownloadImages();
 // TestMGProductImport::testFillImageCache();
 

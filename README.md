@@ -29,4 +29,4 @@ Die Bilder können heruntergeladen werden; oder sie werden via "rsync" in das "i
 /var/www/www.mygassi.com/htdocs/shop/media/import/ und von dort "importiert".
 
 
-
+"eximp.php" und "exim3.php" sind "locale" Mockups der Karlie-Export-Dienste.

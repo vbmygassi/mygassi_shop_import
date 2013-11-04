@@ -300,6 +300,11 @@ class MGProductImport
 		$cat->setParentId(MGImportSettings::CATPREFIX . $group->category_ids);
 		$cat->setImage($group->image);
 		$cat->setDescription($group->description);
+		
+		// do something with category image (product image)...
+		$cat->setMetaDescription($group->sku);
+		// ???
+
 		$cat->save();
 		print $cat->getName() . " " . $cat->getId() . PHP_EOL;;
 		
@@ -609,6 +614,7 @@ class MGProductImport
 	/*
 	Imports downloaded category images
 	*/
+	/*
 	static public function importCategoryImages($coll=null)
 	{
 		MGProductImport::log("importCategoryImages(): " . $coll . PHP_EOL);
@@ -634,9 +640,42 @@ class MGProductImport
 		}
 		return true;
 	}
+	*/
 
 	/*
-	Imports all images
+	Imports all category images
+	*/
+	static public function importCategoryImages()
+	{
+		MGProductImport::log("importCategoryImages(): " . $coll . PHP_EOL);
+		MGProductImport::initMagento();
+		$coll = Mage::getModel("catalog/category")->getCollection();
+		foreach($coll as $category){
+			$category = $category->load($category->getId());
+			MGProductImport::importCategoryImage($category);	
+		}
+	}
+
+	/*
+	Imports image of one category	
+	*/
+	static public function importCategoryImage($category)
+	{
+		MGProductImport::log("importCategoryImage(): " . PHP_EOL);
+		MGProductImport::initMagento();
+		$sku = $category->getMetaDescription();
+		if(null == $sku){
+			return false;
+		}
+		
+		// There is no "SKU" field withing the "productGroups" of the export
+		// there is no image download by "SKU" ...
+		// otdo
+		return MGProductImport::importImageOfProduct($sku);
+	}
+
+	/*
+	Imports all product images
 	*/	
 	static public function importImages()
 	{
@@ -651,7 +690,7 @@ class MGProductImport
 	}
 	
 	/*
-	Import image of one item selected by sku
+	Import image of one product selected by sku
 	*/
 	static public function importImageOfProduct($sku)
 	{
@@ -678,9 +717,13 @@ class MGProductImport
 		}
 
 		// Uha...
+		/*
 		if(0 == strpos($image, "/") ){
 			$image = substr($image, 1, strlen($image));
 		}
+		*/
+
+		// $image = "test.png";
 
 		// RSYNCs the image
 		$target = MGImportSettings::RSYNC . "&sku=" . $prod->getSku();	
@@ -689,6 +732,7 @@ class MGProductImport
 		curl_setopt($ch, CURLOPT_TIMEOUT, 120);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 		$res = curl_exec($ch);
+		MGProductImport::log("importImageOfProduct(): rsync: " . $res . PHP_EOL);
 		$res = curl_close($ch);
 		
 		// Downloads image
@@ -840,7 +884,7 @@ class MGProductImport
 			. MGImportSettings::MAGEDBUSER 
 			. " --password=" . MGImportSettings::MAGEDBPASS 
 			. " --host=" . MGImportSettings::MAGEDBHOST 
-			. " " . MGImportSettings::MAGETABLE 
+			. " " . MGImportSettings::MAGEDBNAME 
 			. " > " . $dest
 		);	
 		return true;
@@ -944,23 +988,22 @@ class MGImportSettings
 {
 	const JSON = 0; const XML = 1;
 	const DOCTYPE = MGImportSettings::JSON;
-	// const PRODUCTLIST = "http://10.14.10.37/karlie/index.php?forward=webservice/mygassi/view.php";
+	const PRODUCTLIST = "http://10.14.10.37/karlie/index.php?forward=webservice/mygassi/view.php";
 	// const PRODUCTLIST = "http://10.14.10.37/karlie/index.php?forward=webservice/mygassi/view_status.php&status=3";
-	const PRODUCTLIST = "http://127.0.0.1/testexport/eximp.php";
+	// const PRODUCTLIST = "http://127.0.0.1/testexport/eximp.php";
  	// const PRODUCTLIST = "http://127.0.0.1/testexport/eximp3.php";
 	const SQLLITE = "./db/sqllite.db";
 	const SQLLITEBCKPP = "./db/bckpp/sqllite.db";
 	const CSVEXPORT = "./export/product-import.csv";
 	const XMLEXPORT = "./export/product-import.xml";
 	const PHPEXPORT = "./export/product-export.php";
-	// const MAGEROOT = "/Users/vico/Workspace/MyGassiShop/app/Mage.php";
 	const MAGEROOT = "/Users/vico/Workspace/MyGassiShop/app/Mage.php";
 	const REFPROD = "./data/mprod.php";
 	const SQLDUMP = "./export/sqldump/";
 	const MAGEDBUSER = "root";
 	const MAGEDBPASS = "2317.187.fuckingsuck";
 	const MAGEDBHOST = "localhost";
-	const MAGETABLE = "magento7"; 
+	const MAGEDBNAME = "magento7";
 	const LOGTOSCREEN = true;
 	const LOGTOFILE = true;
 	const LOGFILE = "./log/import.log";
@@ -977,6 +1020,7 @@ class MGImportSettings
 	//
 	const RSYNC = "http://10.14.10.37/karlie/index.php?forward=webservice/mygassi/image_export.php";
 	// const IMAGEDOWNLOAD = "http://10.14.10.20/mygassipic/";
-	const IMAGEDOWNLOAD = "http://10.14.10.20/mygassipic_new/";
+	// const IMAGEDOWNLOAD = "http://10.14.10.20/mygassipic_new/";
+	const IMAGEDOWNLOAD = "http://10.14.10.37/karlie/webservice/mygassi/mygassipic/";
 }
 
