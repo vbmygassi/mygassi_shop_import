@@ -1008,6 +1008,78 @@ class MGProductImport
 	}
 
 	/*
+	Loads list <export> of "current" product import
+	*/
+	static private function loadReflist()
+	{
+		MGProductImport::log("loadReflist(): " . PHP_EOL);
+		if(!is_file(MGImportSettings::PRODUCTLISTCOPY)){
+			MGProductImport::log("loadReflist(): no ref list" . PHP_EOL);
+			return false;
+		}
+		$d = file_get_contents(MGImportSettings::PRODUCTLISTCOPY);
+		return json_decode($d);
+	}
+
+	/*
+	Selects "dirty" or changed products
+	ref = the imported product list
+	obj = mage product catalog
+	*/
+	static public function selectDirtyProducts()
+	{
+		MGProductImport::log("selectDirtyProducts(): " . PHP_EOL);
+		if(!($reflist = MGProductImport::loadReflist())){
+			MGProductImport::log("selectDirtyProducts(): no ref list" . PHP_EOL);
+			return false;
+		}
+		if(null == $reflist){
+			MGProductImport::log("selectDirtyProducts(): ref list is null" . PHP_EOL);
+			return false;
+		}
+		foreach($reflist->products as $item){
+			switch($item->type){
+				case "default":
+					if(MGProductImport::isProductDirty($item)){
+						MGProductImport::log("selectDirtyProducts(): dirty: " . $item->sku . PHP_EOL);
+					}
+					break;
+				case "grouped":
+					break;
+				case "category":
+					break;
+			}
+		}
+	}
+
+	/*
+	Checks whether or not a product has changed since the import
+	*/
+	static public function isProductDirty($item)
+	{
+		MGProductImport::log("isProductDirty(): " . $item->sku . PHP_EOL);
+		MGProductImport::initMagento();
+		$prod = Mage::getModel("catalog/product")->loadByAttribute("sku", $item->sku);
+		$dirty = false;
+		if($prod->getName() != $item->name){
+			MGProductImport::log("isProductDirty(): name dirty" . PHP_EOL);
+			$dirty = true;
+			return $dirty;
+		}
+		if($prod->getDescription() != $item->description){
+			MGProductImport::log("isProductDirty(): description dirty" . PHP_EOL);
+			$dirty = true;
+			return $dirty;
+		}
+		if($prod->getPrice() != $item->price){
+			MGProductImport::log("isProductDirty(): price dirty" . PHP_EOL);
+			$dirty = true;
+			return $dirty;
+		}	
+		return $dirty;
+	}
+
+	/*
 	Downloaded list of items
 	*/
 	static public $itemlist;
