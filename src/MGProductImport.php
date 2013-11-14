@@ -28,7 +28,37 @@ class MGProductImport
 		$res = curl_setopt($c, CURLOPT_RETURNTRANSFER, 1);
 		$productlist = curl_exec($c); 
 		$res = curl_close($c);
+		$res = MGProductImport::bckppProductlist();
+		$res = MGProductImport::saveProductlist($productlist);
 		return $productlist;
+	}
+
+	/*
+	Saves the "current" productlist
+	-- changes !!---
+	*/
+	static private function saveProductlist($productlist)
+	{
+		MGProductImport::log("saveProductlist(): " . PHP_EOL);
+		$path = MGImportSettings::PRODUCTLISTCOPY;
+		MGProductImport::log("saveProductlist(): to: " . $path . PHP_EOL);
+		$res = file_put_contents($path, $productlist);
+		return $res;
+	}
+
+	/*
+	Backups the "old" product list
+	*/
+	static private function bckppProductlist()
+	{
+		MGProductImport::log("bckppProductlist(): " . PHP_EOL);
+		if(!is_file(MGImportSettings::PRODUCTLISTCOPY)){
+			return false;
+		}
+		$path = MGImportSettings::PRODUCTLISTBCKPP . date("U");
+		MGProductImport::log("Moving productlist copy to: " . $path . PHP_EOL);
+		$res = rename(MGImportSettings::PRODUCTLISTCOPY, $path); 
+		return $res;	
 	}
 	
 	/*	
@@ -1022,5 +1052,8 @@ class MGImportSettings
 	// const IMAGEDOWNLOAD = "http://10.14.10.20/mygassipic/";
 	// const IMAGEDOWNLOAD = "http://10.14.10.20/mygassipic_new/";
 	const IMAGEDOWNLOAD = "http://10.14.10.37/karlie/webservice/mygassi/mygassipic/";
+	// const PRODUCTLIST 
+	const PRODUCTLISTCOPY = "./prodlist/prodlist.json";
+	const PRODUCTLISTBCKPP = "./prodlist/bckpp/";
 }
 

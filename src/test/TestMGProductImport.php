@@ -230,6 +230,8 @@ class TestMGProductImport
 
 // ugly ugly...
 MGProductImport::parseProductlist(MGProductImport::fetchProductlist());
+
+// 
 TestMGProductImport::testDeleteCategories();
 TestMGProductImport::testDeleteProducts();
 TestMGProductImport::testImportItems();
