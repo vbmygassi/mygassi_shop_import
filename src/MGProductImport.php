@@ -52,7 +52,7 @@ class MGProductImport
 	static private function bckppProductlist()
 	{
 		MGProductImport::log("bckppProductlist(): " . PHP_EOL);
-		if(!is_file(MGImportSettings::PRODUCTLISTCOPY)){
+		if(!file_exists(MGImportSettings::PRODUCTLISTCOPY)){
 			return false;
 		}
 		$path = MGImportSettings::PRODUCTLISTBCKPP . date("U");
@@ -642,37 +642,6 @@ class MGProductImport
 	}
 
 	/*
-	Imports downloaded category images
-	*/
-	/*
-	static public function importCategoryImages($coll=null)
-	{
-		MGProductImport::log("importCategoryImages(): " . $coll . PHP_EOL);
-		MGProductImport::initMagento();
-		if(null == $coll){
-			$coll = Mage::getModel("catalog/category")->getCollection();
-		}
-		foreach($coll as $cat){
-			$cat = $cat->load($cat->getId());
-			$cat->setStoreId(0);
-			$img = $cat->getImage();
-			switch($img){
-				case null:
-				case "":
-					$img = "test.png";
-			}
-			$cat->setThumbnail($img);
-			$cat->save();
-			$target = Mage::getBaseDir("media") . DS . "import" . DS . $img;
-			$dest = Mage::getBaseDir("media") . DS . "catalog" . DS . "category" . DS . $img;
-			copy($target, $dest);
-			MGProductImport::log("importCategoryImages(): cat: " . $cat->getId() . " : " . $target . PHP_EOL);
-		}
-		return true;
-	}
-	*/
-
-	/*
 	Imports all category images
 	*/
 	static public function importCategoryImages()
@@ -1013,8 +982,8 @@ class MGProductImport
 	static private function loadReflist()
 	{
 		MGProductImport::log("loadReflist(): " . PHP_EOL);
-		if(!is_file(MGImportSettings::PRODUCTLISTCOPY)){
-			MGProductImport::log("loadReflist(): no ref list" . PHP_EOL);
+		if(!file_exists(MGImportSettings::PRODUCTLISTCOPY)){
+			MGProductImport::log("loadReflist(): no ref list" . MGImportSettings::PRODUCTLISTCOPY . PHP_EOL);
 			return false;
 		}
 		$d = file_get_contents(MGImportSettings::PRODUCTLISTCOPY);
@@ -1030,34 +999,62 @@ class MGProductImport
 	{
 		MGProductImport::log("selectDirtyProducts(): " . PHP_EOL);
 		if(!($reflist = MGProductImport::loadReflist())){
-			MGProductImport::log("selectDirtyProducts(): no ref list" . PHP_EOL);
+			MGProductImport::log("selectDirtyProducts(): no ref list" . MGImportSettings::PRODUCTLISTCOPY . PHP_EOL);
 			return false;
 		}
 		if(null == $reflist){
 			MGProductImport::log("selectDirtyProducts(): ref list is null" . PHP_EOL);
 			return false;
 		}
+		$dirtyProductIDs = array();
+		$dirtyCatIDs = array();
 		foreach($reflist->products as $item){
 			switch($item->type){
-				case "default":
+				case MGImportSettings::PRODUCT_DEFAULT:
 					if(MGProductImport::isProductDirty($item)){
 						MGProductImport::log("selectDirtyProducts(): dirty: " . $item->sku . PHP_EOL);
+						$dirtyProductIDs[]= $item->sku;
 					}
 					break;
-				case "grouped":
-					break;
-				case "category":
+				case MGImportSettings::PRODUCT_GROUP:
+				case MGImportSettings::CATEGORY:
+					if(MGProductImport::isCategoryDirty($item)){
+						MGProductImport::log("selectDirtyProducts(): dirty: " . $item->id . PHP_EOL);
+						$cid = MGImportSettings::CATPREFIX . $item->id;
+						$dirtyCatIDs[]= $cid;
+					}
 					break;
 			}
 		}
+		print_r($dirtyProductIDs);
+		print_r($dirtyCatIDs);
 	}
-
+	
+	/*
+	Checks whether or not a category has changed since the import
+	 */
+	static private function isCategoryDirty($item)
+	{
+		// MGProductImport::log("isCategoryDirty(): " . $item->id . PHP_EOL);
+		MGProductImport::initMagento();
+		$dirty = false;
+		$cid = MGImportSettings::CATPREFIX . $item->id;
+		$cat = Mage::getModel("catalog/category")->load($cid);
+		if($cat->getName() != $item->name){
+			MGProductImport::log("isCategoryDirty(): dirty name" . PHP_EOL);
+			$dirty = true;
+			return $dirty; 
+		}
+		// ...
+		return $dirty;
+	}
+	
 	/*
 	Checks whether or not a product has changed since the import
-	*/
-	static public function isProductDirty($item)
+	 */
+	static private function isProductDirty($item)
 	{
-		MGProductImport::log("isProductDirty(): " . $item->sku . PHP_EOL);
+		// MGProductImport::log("isProductDirty(): " . $item->sku . PHP_EOL);
 		MGProductImport::initMagento();
 		$prod = Mage::getModel("catalog/product")->loadByAttribute("sku", $item->sku);
 		$dirty = false;
@@ -1088,11 +1085,12 @@ class MGProductImport
 
 class MGImportSettings
 {
-	const JSON = 0; const XML = 1;
+	const JSON = 0; 
+	const XML = 1;
 	const DOCTYPE = MGImportSettings::JSON;
-	const PRODUCTLIST = "http://10.14.10.37/karlie/index.php?forward=webservice/mygassi/view.php";
+	// const PRODUCTLIST = "http://10.14.10.37/karlie/index.php?forward=webservice/mygassi/view.php";
 	// const PRODUCTLIST = "http://10.14.10.37/karlie/index.php?forward=webservice/mygassi/view_status.php&status=3";
-	// const PRODUCTLIST = "http://127.0.0.1/testexport/eximp.php";
+	const PRODUCTLIST = "http://127.0.0.1/testexport/eximp.php";
  	// const PRODUCTLIST = "http://127.0.0.1/testexport/eximp3.php";
 	const SQLLITE = "./db/sqllite.db";
 	const SQLLITEBCKPP = "./db/bckpp/sqllite.db";
@@ -1105,7 +1103,8 @@ class MGImportSettings
 	const MAGEDBUSER = "root";
 	const MAGEDBPASS = "2317.187.fuckingsuck";
 	const MAGEDBHOST = "localhost";
-	const MAGEDBNAME = "magento7";
+	// const MAGEDBNAME = "magento7";
+	const MAGEDBNAME = "mg3";
 	const LOGTOSCREEN = true;
 	const LOGTOFILE = true;
 	const LOGFILE = "./log/import.log";
@@ -1120,10 +1119,12 @@ class MGImportSettings
 	// 3 is Mage::app()->getStore()->getRootCategoryId();
 	const ROOTCATS = "1/3/";
 	//
-	const RSYNC = "http://10.14.10.37/karlie/index.php?forward=webservice/mygassi/image_export.php";
+	// const RSYNC = "http://10.14.10.37/karlie/index.php?forward=webservice/mygassi/image_export.php";
+	const RSYNC = "http://127.0.0.1/testexport/image_export.php";
 	// const IMAGEDOWNLOAD = "http://10.14.10.20/mygassipic/";
 	// const IMAGEDOWNLOAD = "http://10.14.10.20/mygassipic_new/";
-	const IMAGEDOWNLOAD = "http://10.14.10.37/karlie/webservice/mygassi/mygassipic/";
+	// const IMAGEDOWNLOAD = "http://10.14.10.37/karlie/webservice/mygassi/mygassipic/";
+	const IMAGEDOWNLOAD = "http://127.0.0.1/testexport/images/";
 	// const PRODUCTLIST 
 	const PRODUCTLISTCOPY = "./prodlist/prodlist.json";
 	const PRODUCTLISTBCKPP = "./prodlist/bckpp/";
