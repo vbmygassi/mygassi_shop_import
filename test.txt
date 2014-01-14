@@ -1,0 +1,297 @@
+initMagento(): 
+updated: 2014-Jan-14 14:16:50
+created: 2014-Jan-14 14:39:03
+01840
+---
+Mage_Catalog_Model_Product Object
+(
+    [_cacheTag:protected] => catalog_product
+    [_eventPrefix:protected] => catalog_product
+    [_eventObject:protected] => product
+    [_canAffectOptions:protected] => 
+    [_typeInstance:protected] => 
+    [_typeInstanceSingleton:protected] => Mage_Catalog_Model_Product_Type_Simple Object
+        (
+            [_product:protected] => 
+            [_typeId:protected] => 
+            [_setAttributes:protected] => 
+            [_editableAttributes:protected] => 
+            [_isComposite:protected] => 
+            [_canConfigure:protected] => 
+            [_canUseQtyDecimals:protected] => 1
+            [_storeFilter:protected] => 
+            [_fileQueue:protected] => Array
+                (
+                )
+
+        )
+
+    [_linkInstance:protected] => 
+    [_customOptions:protected] => Array
+        (
+        )
+
+    [_urlModel:protected] => 
+    [_errors:protected] => Array
+        (
+        )
+
+    [_optionInstance:protected] => 
+    [_options:protected] => Array
+        (
+        )
+
+    [_reservedAttributes:protected] => 
+    [_isDuplicable:protected] => 1
+    [_calculatePrice:protected] => 1
+    [_defaultValues:protected] => Array
+        (
+            [url_path] => rondo-halsband-braun-27mm-52cm-unterlegt-genaeht.html
+        )
+
+    [_storeValuesFlags:protected] => Array
+        (
+            [url_path] => 1
+        )
+
+    [_lockedAttributes:protected] => Array
+        (
+        )
+
+    [_isDeleteable:protected] => 1
+    [_isReadonly:protected] => 
+    [_resourceName:protected] => catalog/product
+    [_resource:protected] => 
+    [_resourceCollectionName:protected] => catalog/product_collection
+    [_dataSaveAllowed:protected] => 1
+    [_isObjectNew:protected] => 
+    [_data:protected] => Array
+        (
+            [entity_id] => 1
+            [entity_type_id] => 10
+            [attribute_set_id] => 9
+            [type_id] => simple
+            [sku] => 01840
+            [created_at] => 2013-10-17 15:28:40
+            [updated_at] => 2014-01-14 14:16:50
+            [has_options] => 0
+            [required_options] => 0
+            [is_salable] => 1
+            [stock_item] => Mage_CatalogInventory_Model_Stock_Item Object
+                (
+                    [_minSaleQtyCache:Mage_CatalogInventory_Model_Stock_Item:private] => Array
+                        (
+                        )
+
+                    [_qtyIncrements:protected] => 
+                    [_eventPrefix:protected] => cataloginventory_stock_item
+                    [_eventObject:protected] => item
+                    [_productInstance:protected] => Mage_Catalog_Model_Product Object
+ *RECURSION*
+                    [_customerGroupId:protected] => 
+                    [_processIndexEvents:protected] => 1
+                    [_resourceName:protected] => cataloginventory/stock_item
+                    [_resource:protected] => 
+                    [_resourceCollectionName:protected] => cataloginventory/stock_item_collection
+                    [_cacheTag:protected] => 
+                    [_dataSaveAllowed:protected] => 1
+                    [_isObjectNew:protected] => 
+                    [_data:protected] => Array
+                        (
+                            [item_id] => 3
+                            [product_id] => 1
+                            [stock_id] => 1
+                            [qty] => 0.0000
+                            [min_qty] => 0.0000
+                            [use_config_min_qty] => 0
+                            [is_qty_decimal] => 0
+                            [backorders] => 0
+                            [use_config_backorders] => 0
+                            [min_sale_qty] => 0.0000
+                            [use_config_min_sale_qty] => 0
+                            [max_sale_qty] => 0.0000
+                            [use_config_max_sale_qty] => 0
+                            [is_in_stock] => 0
+                            [low_stock_date] => 
+                            [notify_stock_qty] => 0.0000
+                            [use_config_notify_stock_qty] => 0
+                            [manage_stock] => 0
+                            [use_config_manage_stock] => 0
+                            [stock_status_changed_auto] => 1
+                            [use_config_qty_increments] => 0
+                            [qty_increments] => 0.0000
+                            [use_config_enable_qty_inc] => 0
+                            [enable_qty_increments] => 0
+                            [is_decimal_divided] => 0
+                            [type_id] => simple
+                            [stock_status_changed_automatically] => 1
+                            [use_config_enable_qty_increments] => 0
+                            [product_name] => xxx RONDO HALSBAND BRAUN,27MM 52CM UNTERLEGT, GENÄHT xxx
+                            [store_id] => 1
+                            [product_type_id] => simple
+                            [product_status_changed] => 1
+                            [product_changed_websites] => 
+                        )
+
+                    [_hasDataChanges:protected] => 1
+                    [_origData:protected] => Array
+                        (
+                            [item_id] => 3
+                            [product_id] => 1
+                            [stock_id] => 1
+                            [qty] => 0.0000
+                            [min_qty] => 0.0000
+                            [use_config_min_qty] => 0
+                            [is_qty_decimal] => 0
+                            [backorders] => 0
+                            [use_config_backorders] => 0
+                            [min_sale_qty] => 0.0000
+                            [use_config_min_sale_qty] => 0
+                            [max_sale_qty] => 0.0000
+                            [use_config_max_sale_qty] => 0
+                            [is_in_stock] => 0
+                            [low_stock_date] => 
+                            [notify_stock_qty] => 0.0000
+                            [use_config_notify_stock_qty] => 0
+                            [manage_stock] => 0
+                            [use_config_manage_stock] => 0
+                            [stock_status_changed_auto] => 1
+                            [use_config_qty_increments] => 0
+                            [qty_increments] => 0.0000
+                            [use_config_enable_qty_inc] => 0
+                            [enable_qty_increments] => 0
+                            [is_decimal_divided] => 0
+                            [type_id] => simple
+                            [stock_status_changed_automatically] => 1
+                            [use_config_enable_qty_increments] => 0
+                        )
+
+                    [_idFieldName:protected] => item_id
+                    [_isDeleted:protected] => 
+                    [_oldFieldsMap:protected] => Array
+                        (
+                            [stock_status_changed_automatically] => stock_status_changed_auto
+                            [use_config_enable_qty_increments] => use_config_enable_qty_inc
+                        )
+
+                    [_syncFieldsMap:protected] => Array
+                        (
+                            [stock_status_changed_automatically] => stock_status_changed_auto
+                            [use_config_enable_qty_increments] => use_config_enable_qty_inc
+                            [stock_status_changed_auto] => stock_status_changed_automatically
+                            [use_config_enable_qty_inc] => use_config_enable_qty_increments
+                        )
+
+                )
+
+            [price] => 19.9900
+            [cost] => 
+            [weight] => 
+            [special_price] => 
+            [msrp] => 
+            [name] => xxx RONDO HALSBAND BRAUN,27MM 52CM UNTERLEGT, GENÄHT xxx
+            [meta_title] => 
+            [meta_description] => 
+            [image] => no_selection
+            [small_image] => no_selection
+            [url_key] => rondo-halsband-braun-27mm-52cm-unterlegt-genaeht
+            [thumbnail] => no_selection
+            [gift_message_available] => 
+            [url_path] => rondo-halsband-braun-27mm-52cm-unterlegt-genaeht.html
+            [custom_design] => 
+            [options_container] => container2
+            [page_layout] => 
+            [country_of_manufacture] => 
+            [msrp_enabled] => 2
+            [msrp_display_actual_price_type] => 4
+            [delivery_time] => 2-3 Tage
+            [tierart] => 
+            [globalname] => 
+            [description] => Breites Halsband.
+
+Dieses unterlegt gen\u00e4hte Rondo Halsband ist ein 2-lagig verarbeitetes Halsband. Vollrindleder ist mit einer weichen Unterlage unterf\u00fcttert. Die N\u00e4hte sind farblich passend auf das Halsband abgestimmt. Die weiche Kante ist besonders fellschonend und beugt Haarbruch vor. Das Halsband ist mit stabilen, verchromten Beschl\u00e4gen verarbeitet.
+Made in Germany. 5 Jahre Garantie.
+Aus der Rondo-Linie gibt es zahlreiche passende Leinen.
+            [meta_keyword] => 
+            [short_description] => 
+            [custom_layout_update] => 
+            [basisartikelnr] => 
+            [packaging_unit] => 
+            [min_qty] => 
+            [ean] => 
+            [vat] => 
+            [infrastat_number] => 
+            [length] => 
+            [width] => 2.7 cm
+            [height] => 
+            [diameter] => 
+            [volume] => 
+            [size] => 19.99
+            [bargain] => 
+            [new] => 
+            [old_price] => 
+            [manufacturer] => 
+            [color] => 
+            [status] => 1
+            [tax_class_id] => 1
+            [visibility] => 4
+            [enable_googlecheckout] => 1
+            [is_recurring] => 0
+            [is_top_product] => 0
+            [is_stream_product] => 0
+            [special_from_date] => 
+            [special_to_date] => 
+            [custom_design_from] => 
+            [custom_design_to] => 
+            [news_from_date] => 
+            [news_to_date] => 
+            [group_price] => Array
+                (
+                )
+
+            [group_price_changed] => 0
+            [tier_price] => Array
+                (
+                )
+
+            [tier_price_changed] => 0
+            [media_gallery] => Array
+                (
+                    [images] => Array
+                        (
+                            [0] => Array
+                                (
+                                    [value_id] => 11651
+                                    [file] => /4/1/4158_350.png
+                                    [label] => the1stImage
+                                    [position] => 1
+                                    [disabled] => 0
+                                    [label_default] => the1stImage
+                                    [position_default] => 1
+                                    [disabled_default] => 0
+                                )
+
+                        )
+
+                    [values] => Array
+                        (
+                        )
+
+                )
+
+            [is_in_stock] => 1
+        )
+
+    [_hasDataChanges:protected] => 
+    [_origData:protected] => 
+    [_idFieldName:protected] => entity_id
+    [_isDeleted:protected] => 
+    [_oldFieldsMap:protected] => Array
+        (
+        )
+
+    [_syncFieldsMap:protected] => Array
+        (
+        )
+
+)

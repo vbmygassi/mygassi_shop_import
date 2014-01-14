@@ -237,12 +237,28 @@ class TestMGProductImport
 	{
 		MGProductImport::submitEditedProducts();	
 	}
+
+	static public function testWriteImportTimestamp()
+	{
+		// assume something
+		// i don't care
+		$res = MGProductImport::writeImportTimestamp();
+	}
+
+	static public function testReadImportTimestamp()
+	{
+		$res = MGProductImport::readImportTimestamp();
+	}
 }
+
+date_default_timezone_set("Europe/Berlin");
 
 // MGProductImport::parseProductlist(MGProductImport::fetchProductlist());
 
 // TestMGProductImport::testSelectDirtyProducts();
 // 
+// TestMGProductImport::testWriteImportTimestamp();
+// TestMGProductImport::testReadImportTimestamp();
 TestMGProductImport::testSubmitEditedProducts();
 
 /*
@@ -250,8 +266,8 @@ TestMGProductImport::testDeleteCategories();
 TestMGProductImport::testDeleteProducts();
 TestMGProductImport::testImportItems();
 TestMGProductImport::testCleanImageCache();
+TestMGProductImport::testImportImages3();
 */
-// TestMGProductImport::testImportImages3();
 
 // TestMGProductImport::testImportImages2(array("1", "31473"));
 // TestMGProductImport::testDownloadImages();

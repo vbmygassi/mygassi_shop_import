@@ -303,8 +303,47 @@ class MGProductImport
 					break;
 			}
 		}
+		MGProductImport::writeImportTimestamp();
 		return true;
 	}
+
+	/*
+	Writes timestamp of import (as for to (more like so) validate against updates)0
+	@returns boolean process state
+	*/
+	static public function writeImportTimestamp()
+	{
+		$timestamp = date("U");
+		if(@file_put_contents(MGImportSettings::IMPORT_TIMESTAMP_PATH, $timestamp)){
+			return true;
+		} 
+		else {
+			return false;
+		}
+	}
+
+	/*
+	Reads import timestamp
+	@returns unix time stamp date("U")
+	*/
+	static public function readImportTimestamp()
+	{
+		$result = @file_get_contents(MGImportSettings::IMPORT_TIMESTAMP_PATH);
+		switch($result){
+			case null:
+			case NULL:
+			case false:
+			case "":
+			case -1:
+			case 0:
+				$result = date("U");
+				break;	
+	
+		}	
+		return $result;	
+	}
+	
+
 
 	/*
 	Imports a product group
@@ -544,7 +583,8 @@ class MGProductImport
 		$mprod->setSize($product->price);
 		$mprod->setIsTopProduct($product->top_product);
 		$mprod->setIsStreamProduct($product->stream_product);
-		$mprod->setCreated($product->created);		
+		// $mprod->setCreated($product->created);		
+		$mprod->setCreated(date("U"));
 		$mprod->setSyncKarlie($product->sync_karlie);		
 	
 		$mprod->setTypeId("simple");
@@ -1096,18 +1136,19 @@ class MGProductImport
 
 	/*
 	Submits the changes made since last import of a product
-	der war schwer
+	Der war schwer
 	*/
 	static public function submitEditedProducts() 
 	{
 		MGProductImport::initMagento();
-		$lit = date("U") -(60 *60 *24); // assume last import was yesterday
+		// $lit = date("U") -(60 *60 *24); // assume last import was yesterday
+		$lit = MGProductImport::readImportTimestamp();
 		$coll = Mage::getModel("catalog/product")->getCollection();
 		foreach($coll as $prod){
 			$put = strtotime($prod->getUpdatedAt());
 			if($lit < $put){
-				print "updated: " . $put . PHP_EOL;
-				print "created: " . $lit . PHP_EOL;
+				print "updated: " . date("Y-M-d H:i:s", $put) . PHP_EOL;
+				print "imported: " . date("Y-M-d H:i:s", $lit) . PHP_EOL;
 				print "---" . PHP_EOL;
 				$prod = $prod->load($prod->getId());
 				$imagePath = "";
@@ -1124,7 +1165,10 @@ class MGProductImport
 					'mygassi_uvp' => $prod->getOldPrice(),
 					'mygassi_image' => '@' . "'" . $imagePath . "'"
 				);
-				include("post_article.php");
+				// include("post_article.php");
+				// MGProductImport::writeImportTimestamp();	
+				print_r($postargs);	
+				print PHP_EOL;
 			}
 		}
 	}
@@ -1182,5 +1226,6 @@ class MGImportSettings
 	// const PRODUCTLIST 
 	const PRODUCTLISTCOPY = "./prodlist/prodlist.json";
 	const PRODUCTLISTBCKPP = "./prodlist/bckpp/";
+	const IMPORT_TIMESTAMP_PATH = "./prodlist/import_timestamp";
 }
 

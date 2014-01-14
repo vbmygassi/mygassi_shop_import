@@ -55,5 +55,3 @@ curl_close($handle);
 
 
 
-print_r($postargs);
-print PHP_EOL;
