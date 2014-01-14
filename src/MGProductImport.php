@@ -1143,12 +1143,14 @@ class MGProductImport
 		MGProductImport::initMagento();
 		// $lit = date("U") -(60 *60 *24); // assume last import was yesterday
 		$lit = MGProductImport::readImportTimestamp();
+		// print "imported: " . date("Y-m-d H:i:s", $lit) . PHP_EOL;
 		$coll = Mage::getModel("catalog/product")->getCollection();
 		foreach($coll as $prod){
 			$put = strtotime($prod->getUpdatedAt());
+			// print "updated: " . date("Y-m-d H:i:s", $put) . PHP_EOL;
 			if($lit < $put){
-				print "updated: " . date("Y-M-d H:i:s", $put) . PHP_EOL;
-				print "imported: " . date("Y-M-d H:i:s", $lit) . PHP_EOL;
+				print "updated: " . date("Y-m-d H:i:s", $put) . PHP_EOL;
+				print "imported: " . date("Y-m-d H:i:s", $lit) . PHP_EOL;
 				print "---" . PHP_EOL;
 				$prod = $prod->load($prod->getId());
 				$imagePath = "";
@@ -1165,8 +1167,8 @@ class MGProductImport
 					'mygassi_uvp' => $prod->getOldPrice(),
 					'mygassi_image' => '@' . "'" . $imagePath . "'"
 				);
-				// include("post_article.php");
-				// MGProductImport::writeImportTimestamp();	
+				include("post_article.php");
+				MGProductImport::writeImportTimestamp();	
 				print_r($postargs);	
 				print PHP_EOL;
 			}

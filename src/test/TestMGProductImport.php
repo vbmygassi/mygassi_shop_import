@@ -241,7 +241,6 @@ class TestMGProductImport
 	static public function testWriteImportTimestamp()
 	{
 		// assume something
-		// i don't care
 		$res = MGProductImport::writeImportTimestamp();
 	}
 
