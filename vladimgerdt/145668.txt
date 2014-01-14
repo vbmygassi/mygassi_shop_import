@@ -1,0 +1,1 @@
+[{"cid":"179","idCategory":"128700","parentId":"145668","sortNb":"0","language":[{"clid":"375","idCategory":"128700","idLang":"1","title":"X-mas Katze"},{"clid":"376","idCategory":"128700","idLang":"2","title":"Xmas cat"}]}]

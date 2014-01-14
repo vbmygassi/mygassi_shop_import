@@ -576,7 +576,7 @@ class MGProductImport
 			. ": " 
 			. $mprod->getId() 
 			. ": "
-				. $mprod->getName()
+			. $mprod->getName()
 			. ": "
 			. $mprod->getStoreId()
 			. " :done" 
@@ -764,6 +764,24 @@ class MGProductImport
 		// Imports image asset into magento
 		$label = "the1stImage";
 		$target = Mage::getBaseDir("media") . DS . "import" . DS . $image;
+		
+
+
+
+
+
+		// test target (that is to be imported)
+		$res = exec("file " . $target);
+		if(false === strrpos($res, ("image data"))){
+			$target = "/Users/vico/Workspace/ProdImport/mygassi_shop_import/_mygassi_shop_import/data/images/fantomas.png";
+			print "imported image is not of type image\n";
+		}
+	
+
+
+
+
+		// 	
 		try{
 			$prod->addImageToMediaGallery($target, $visibility, false, false);
 			MGProductImport::log("importImageOfProduct(): image imported: " . $target . PHP_EOL);
@@ -1077,6 +1095,41 @@ class MGProductImport
 	}
 
 	/*
+	Submits the changes made since last import of a product
+	der war schwer
+	*/
+	static public function submitEditedProducts() 
+	{
+		MGProductImport::initMagento();
+		$lit = date("U") -(60 *60 *24); // assume last import was yesterday
+		$coll = Mage::getModel("catalog/product")->getCollection();
+		foreach($coll as $prod){
+			$put = strtotime($prod->getUpdatedAt());
+			if($lit < $put){
+				print "updated: " . $put . PHP_EOL;
+				print "created: " . $lit . PHP_EOL;
+				print "---" . PHP_EOL;
+				$prod = $prod->load($prod->getId());
+				$imagePath = "";
+				foreach($prod->getMediaGalleryImages() as $image){
+					if("the1stImage" === $image->getLabel()){ 
+						$imagePath = $image->getPath();
+					}
+				}
+				$postargs = array
+				(
+					'sku' => $prod->getSku(),
+					'mygassi_headline' => $prod->getName(),
+					'mygassi_text' => $prod->getDescription(),
+					'mygassi_uvp' => $prod->getOldPrice(),
+					'mygassi_image' => '@' . "'" . $imagePath . "'"
+				);
+				include("post_article.php");
+			}
+		}
+	}
+
+	/*
 	Downloaded list of items
 	*/
 	static public $itemlist;
@@ -1088,10 +1141,11 @@ class MGImportSettings
 	const JSON = 0; 
 	const XML = 1;
 	const DOCTYPE = MGImportSettings::JSON;
-	// const PRODUCTLIST = "http://10.14.10.37/karlie/index.php?forward=webservice/mygassi/view.php";
+	const PRODUCTLIST = "http://10.14.10.37/karlie/index.php?forward=webservice/mygassi/view.php";
 	// const PRODUCTLIST = "http://10.14.10.37/karlie/index.php?forward=webservice/mygassi/view_status.php&status=3";
-	const PRODUCTLIST = "http://127.0.0.1/testexport/eximp.php";
+	// const PRODUCTLIST = "http://127.0.0.1/testexport/eximp.php";
  	// const PRODUCTLIST = "http://127.0.0.1/testexport/eximp3.php";
+	// const PRODUCTLIST = "http://127.0.0.1/testexport/vladimgerdt/mygassi_article.txt";
 	const SQLLITE = "./db/sqllite.db";
 	const SQLLITEBCKPP = "./db/bckpp/sqllite.db";
 	const CSVEXPORT = "./export/product-import.csv";
@@ -1119,12 +1173,12 @@ class MGImportSettings
 	// 3 is Mage::app()->getStore()->getRootCategoryId();
 	const ROOTCATS = "1/3/";
 	//
-	// const RSYNC = "http://10.14.10.37/karlie/index.php?forward=webservice/mygassi/image_export.php";
-	const RSYNC = "http://127.0.0.1/testexport/image_export.php";
+	const RSYNC = "http://10.14.10.37/karlie/index.php?forward=webservice/mygassi/image_export.php";
+	// const RSYNC = "http://127.0.0.1/testexport/image_export.php?nix=nix";
 	// const IMAGEDOWNLOAD = "http://10.14.10.20/mygassipic/";
 	// const IMAGEDOWNLOAD = "http://10.14.10.20/mygassipic_new/";
-	// const IMAGEDOWNLOAD = "http://10.14.10.37/karlie/webservice/mygassi/mygassipic/";
-	const IMAGEDOWNLOAD = "http://127.0.0.1/testexport/images/";
+	const IMAGEDOWNLOAD = "http://10.14.10.37/karlie/webservice/mygassi/mygassipic/";
+	// const IMAGEDOWNLOAD = "http://127.0.0.1/testexport/images/";
 	// const PRODUCTLIST 
 	const PRODUCTLISTCOPY = "./prodlist/prodlist.json";
 	const PRODUCTLISTBCKPP = "./prodlist/bckpp/";

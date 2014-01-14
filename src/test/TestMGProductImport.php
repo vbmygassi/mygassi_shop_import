@@ -232,20 +232,26 @@ class TestMGProductImport
 		// assume somethong
 		MGProductImport::selectDirtyProducts();
 	}
+
+	static public function testSubmitEditedProducts()
+	{
+		MGProductImport::submitEditedProducts();	
+	}
 }
 
-// ugly ugly...
-MGProductImport::parseProductlist(MGProductImport::fetchProductlist());
+// MGProductImport::parseProductlist(MGProductImport::fetchProductlist());
 
 // TestMGProductImport::testSelectDirtyProducts();
 // 
+TestMGProductImport::testSubmitEditedProducts();
+
 /*
 TestMGProductImport::testDeleteCategories();
 TestMGProductImport::testDeleteProducts();
 TestMGProductImport::testImportItems();
 TestMGProductImport::testCleanImageCache();
 */
-TestMGProductImport::testImportImages3();
+// TestMGProductImport::testImportImages3();
 
 // TestMGProductImport::testImportImages2(array("1", "31473"));
 // TestMGProductImport::testDownloadImages();
