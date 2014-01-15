@@ -802,7 +802,7 @@ class MGProductImport
 		}	
 		
 		// Imports image asset into magento
-		$label = "the1stImage";
+		$label = "the1st";
 		$target = Mage::getBaseDir("media") . DS . "import" . DS . $image;
 		
 
@@ -1155,7 +1155,7 @@ class MGProductImport
 				$prod = $prod->load($prod->getId());
 				$imagePath = "";
 				foreach($prod->getMediaGalleryImages() as $image){
-					if("the1stImage" === $image->getLabel()){ 
+					if("the1st" === $image->getLabel()){ 
 						$imagePath = $image->getPath();
 					}
 				}
@@ -1167,10 +1167,14 @@ class MGProductImport
 					'mygassi_uvp' => $prod->getOldPrice(),
 					'mygassi_image' => '@' . "'" . $imagePath . "'"
 				);
+				$postargs = json_encode($postargs);
 				include("post_article.php");
-				MGProductImport::writeImportTimestamp();	
+				
+
 				print_r($postargs);	
 				print PHP_EOL;
+				
+				MGProductImport::writeImportTimestamp();	
 			}
 		}
 	}

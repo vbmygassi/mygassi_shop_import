@@ -1,4 +1,5 @@
-<?php
+<?php date_default_timezone_set("Europe/Berlin"); 
+
 require_once("src/MGProductImport.php");
 
 class TestMGProductImport
@@ -218,24 +219,24 @@ class TestMGProductImport
 	static public function testImportImages2($skus)
 	{
 		foreach($skus as $sku){
-			MGProductImport::importImageOfProduct($sku);
+			$res = MGProductImport::importImageOfProduct($sku);
 		}				
 	}
 
 	static public function testImportImages3()
 	{
-		MGProductImport::importImages();
+		$res = MGProductImport::importImages();
 	}
 
 	static public function testSelectDirtyProducts()
 	{
 		// assume somethong
-		MGProductImport::selectDirtyProducts();
+		$res = MGProductImport::selectDirtyProducts();
 	}
 
 	static public function testSubmitEditedProducts()
 	{
-		MGProductImport::submitEditedProducts();	
+		$res = MGProductImport::submitEditedProducts();	
 	}
 
 	static public function testWriteImportTimestamp()
@@ -250,15 +251,15 @@ class TestMGProductImport
 	}
 }
 
-date_default_timezone_set("Europe/Berlin");
 
 // MGProductImport::parseProductlist(MGProductImport::fetchProductlist());
 
 // TestMGProductImport::testSelectDirtyProducts();
 // 
-// TestMGProductImport::testWriteImportTimestamp();
-// TestMGProductImport::testReadImportTimestamp();
-TestMGProductImport::testSubmitEditedProducts();
+/*
+TestMGProductImport::testWriteImportTimestamp();
+TestMGProductImport::testReadImportTimestamp();
+*/
 
 /*
 TestMGProductImport::testDeleteCategories();
@@ -267,6 +268,7 @@ TestMGProductImport::testImportItems();
 TestMGProductImport::testCleanImageCache();
 TestMGProductImport::testImportImages3();
 */
+TestMGProductImport::testSubmitEditedProducts();
 
 // TestMGProductImport::testImportImages2(array("1", "31473"));
 // TestMGProductImport::testDownloadImages();

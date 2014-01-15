@@ -1,5 +1,4 @@
 <?php
-// ----------------------------------------------------------------------------------------------
 /*
  * Author: Vladimir Gerdt
  * Company: Karlie Heimtierbedarf GmbH
@@ -15,11 +14,8 @@
  *      mygassi_uvp: ( decimal ), if empty then there is no changes.
  *      mygassi_image: @path/to/image ( jpg, png, git, tif ), if empty then there is no changes.
  */
-// $request =  'http://cs.karlie.de/karlie/index.php?forward=webservice/mygassi/article.php';
-$request =  'http://10.14.10.37/karlie/index.php?forward=webservice/mygassi/post_article.php';
+$request =  'http://cs.karlie.de/karlie/index.php?forward=webservice/mygassi/article.php';
 
-// postargs get prfilled above -->vberzsin@mygassi.com 
-/*
 $postargs = array
 (
     'sku' => '02270',
@@ -28,7 +24,7 @@ $postargs = array
     'mygassi_uvp' => 8.95,
     'mygassi_image' => '@' . '/var/www/CS12/karlie/webservice/mygassi/image/Tulips.jpg'
 );
-*/
+
 // 02260_MG_01.tif
 
 $headers = array(
@@ -49,12 +45,9 @@ curl_setopt($handle, CURLOPT_POSTFIELDS, $postargs);
 $response = curl_exec($handle);
 $code = curl_getinfo($handle, CURLINFO_HTTP_CODE);
 
-
-
-
-// status message
-print "exiting with code: " . $code . PHP_EOL;
-print "exiting with response: " . $response . PHP_EOL;
-
 // close cURL resource, and free up system resources
 curl_close($handle);
+// output
+echo $code . '<br />';
+echo '[' . $response . ']';
+?>
