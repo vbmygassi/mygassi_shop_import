@@ -1165,9 +1165,9 @@ class MGProductImport
 					'mygassi_headline' => $prod->getName(),
 					'mygassi_text' => $prod->getDescription(),
 					'mygassi_uvp' => $prod->getOldPrice(),
-					'mygassi_image' => '@' . "'" . $imagePath . "'"
+					'mygassi_image' => '@' . $imagePath 
 				);
-				$postargs = json_encode($postargs);
+				// $postargs = json_encode($postargs);
 				include("post_article.php");
 				
 
