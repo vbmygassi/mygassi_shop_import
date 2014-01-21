@@ -96,6 +96,10 @@ class MGProductImport
 		switch(MGImportSettings::DOCTYPE){
 			case MGImportSettings::JSON:
 				$result = json_decode($productlist);
+				if(count($result) < 1){
+					MGProductImport::log("parseProductlist(): productlist empty" . PHP_EOL);
+					exit(1);
+				}
 				// Workaround (as for the missing ids (in some documents))
 				foreach($result->products as $key=>$value){
 					if(!isset($value->id)){
@@ -314,12 +318,13 @@ class MGProductImport
 	static public function writeImportTimestamp()
 	{
 		$timestamp = date("U");
-		if(@file_put_contents(MGImportSettings::IMPORT_TIMESTAMP_PATH, $timestamp)){
+		if(@file_put_contents(MGImportSettings::IMPRTTIMSTMPPTH, $timestamp)){
 			return true;
 		} 
 		else {
 			return false;
 		}
+		MGProductImport::log("writeImportTimestamp(): " . $timestamp . PHP_EOL);
 	}
 
 	/*
@@ -328,7 +333,7 @@ class MGProductImport
 	*/
 	static public function readImportTimestamp()
 	{
-		$result = @file_get_contents(MGImportSettings::IMPORT_TIMESTAMP_PATH);
+		$result = @file_get_contents(MGImportSettings::IMPRTTIMSTMPPTH);
 		switch($result){
 			case null:
 			case NULL:
@@ -1148,7 +1153,7 @@ class MGProductImport
 		foreach($coll as $prod){
 			$put = strtotime($prod->getUpdatedAt());
 			// print "updated: " . date("Y-m-d H:i:s", $put) . PHP_EOL;
-			if($lit < $put){
+			if($lit < $put){ print "!"; exit(1);
 				print "updated: " . date("Y-m-d H:i:s", $put) . PHP_EOL;
 				print "imported: " . date("Y-m-d H:i:s", $lit) . PHP_EOL;
 				print "---" . PHP_EOL;
@@ -1173,10 +1178,9 @@ class MGProductImport
 
 				print_r($postargs);	
 				print PHP_EOL;
-				
-				MGProductImport::writeImportTimestamp();	
 			}
 		}
+		MGProductImport::writeImportTimestamp();	
 	}
 
 	/*
@@ -1232,6 +1236,6 @@ class MGImportSettings
 	// const PRODUCTLIST 
 	const PRODUCTLISTCOPY = "./prodlist/prodlist.json";
 	const PRODUCTLISTBCKPP = "./prodlist/bckpp/";
-	const IMPORT_TIMESTAMP_PATH = "./prodlist/import_timestamp";
+	const IMPRTTIMSTMPPTH = "./prodlist/import_timestamp";
 }
 

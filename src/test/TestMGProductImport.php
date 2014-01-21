@@ -252,20 +252,23 @@ class TestMGProductImport
 }
 
 
-MGProductImport::parseProductlist(MGProductImport::fetchProductlist());
+// MGProductImport::parseProductlist(MGProductImport::fetchProductlist());
 
 // TestMGProductImport::testSelectDirtyProducts();
 // 
+// TestMGProductImport::testWriteImportTimestamp();
+
 /*
-TestMGProductImport::testWriteImportTimestamp();
 TestMGProductImport::testReadImportTimestamp();
 */
 
+/*
 TestMGProductImport::testDeleteCategories();
 TestMGProductImport::testDeleteProducts();
-TestMGProductImport::testImportItems();
-TestMGProductImport::testCleanImageCache();
-TestMGProductImport::testImportImages3();
+*/
+// TestMGProductImport::testImportItems();
+// TestMGProductImport::testCleanImageCache();
+// TestMGProductImport::testImportImages3();
 
 TestMGProductImport::testSubmitEditedProducts();
 
